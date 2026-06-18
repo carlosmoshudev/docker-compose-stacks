@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Seguridad o secreto filtrado
+    url: https://github.com/carlosmoshudev/pro/security/policy
+    about: Usa la politica de seguridad antes de abrir detalles sensibles en una issue publica.

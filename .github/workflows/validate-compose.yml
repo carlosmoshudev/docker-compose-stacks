@@ -1,0 +1,34 @@
+name: Validate Docker Compose
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate-compose:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Find and validate compose files
+        shell: bash
+        run: |
+          set -e
+
+          git ls-files '*/compose.yaml' | while IFS= read -r file; do
+            dir="$(dirname "${file}")"
+            echo "Validating $file"
+
+            if [ -f "${dir}/.env.example" ]; then
+              docker compose --project-directory "${dir}" --env-file "${dir}/.env.example" -f "${file}" config --quiet
+            else
+              docker compose --project-directory "${dir}" -f "${file}" config --quiet
+            fi
+          done
