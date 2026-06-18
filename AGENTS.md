@@ -169,3 +169,25 @@ DOCS add guide
 En `docs/codex/` hay guías adicionales para trabajar en este repositorio.
 
 Consulta esa carpeta cuando la tarea esté relacionada con Docker, documentación, estructura del proyecto, Home Assistant, automatización o normas específicas del homelab.
+
+## Notas de agentes y auto-guías
+
+Si un agente necesita anotarse información útil para futuras tareas, puede crear archivos Markdown dentro de `docs/codex/`.
+
+Reglas:
+
+- Los archivos creados automáticamente por agentes no deben empezar por `carlos-`.
+- El prefijo `carlos-` queda reservado para instrucciones escritas o aprobadas directamente por Carlos.
+- Los agentes pueden usar prefijos como:
+  - `codex-`
+  - `openai-`
+  - `gpt-`
+- Usar nombres descriptivos en formato kebab-case.
+
+Ejemplos válidos:
+
+```txt
+docs/codex/codex-guia-validacion-compose.md
+docs/codex/openai-notas-healthchecks.md
+docs/codex/gpt-guia-para-documentar-puertos.md
+```

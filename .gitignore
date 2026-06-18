@@ -1,13 +1,9 @@
 # ============================================================
-
 # Gitignore - Homelab / Docker / Automation
-
 # ============================================================
 
 # ------------------------------------------------------------
-
 # Entorno y secretos
-
 # ------------------------------------------------------------
 
 **/.env
@@ -16,12 +12,10 @@
 **/*.env
 
 # Mantener ejemplos versionados
-
 !**/.env.example
 !**/*.env.example
 
 # Secretos / credenciales / certificados
-
 **/secrets/
 **/secret/
 **/credentials/
@@ -40,9 +34,7 @@
 **/*credential*
 
 # ------------------------------------------------------------
-
 # Datos persistentes de contenedores
-
 # ------------------------------------------------------------
 
 **/data/
@@ -61,15 +53,13 @@
 **/log/
 
 # Excepción: si algún proyecto tiene configs de ejemplo
-
 !**/config.example/
 !**/config/**/*.example
 !**/config/**/*.sample
+!**/config/**/.gitkeep
 
 # ------------------------------------------------------------
-
 # Backups y copias manuales
-
 # ------------------------------------------------------------
 
 *.bak
@@ -84,16 +74,13 @@
 *.swo
 
 # Backups concretos tipo compose.yaml.bkp
-
 **/*.yaml.bkp
 **/*.yml.bkp
 **/*.json.bkp
 **/*.md.bkp
 
 # ------------------------------------------------------------
-
 # Archivos privados/personales del proyecto
-
 # ------------------------------------------------------------
 
 **/sugerencias.md
@@ -102,13 +89,12 @@
 **/NOTAS.md
 **/todo-private.md
 **/private.md
+
 /ports
 /ports/
 
 # ------------------------------------------------------------
-
 # Sistema operativo
-
 # ------------------------------------------------------------
 
 .DS_Store
@@ -118,39 +104,37 @@ ehthumbs.db
 $RECYCLE.BIN/
 
 # ------------------------------------------------------------
-
 # Editores / IDE
-
 # ------------------------------------------------------------
 
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.example.json
+
 .idea/
 *.code-workspace
 
 # ------------------------------------------------------------
-
 # Python / scripts auxiliares
-
 # ------------------------------------------------------------
 
-**pycache**/
+__pycache__/
+**/__pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+
 .venv/
 venv/
 env/
+
 .envrc
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 
 # ------------------------------------------------------------
-
 # Node / herramientas web
-
 # ------------------------------------------------------------
 
 node_modules/
@@ -158,14 +142,13 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
 dist/
 build/
 .cache/
 
 # ------------------------------------------------------------
-
 # Logs generales
-
 # ------------------------------------------------------------
 
 *.log
@@ -173,15 +156,30 @@ logs/
 log/
 
 # ------------------------------------------------------------
-
 # Mantener documentación importante para Codex y humanos
-
 # ------------------------------------------------------------
 
 !AGENTS.md
 !README.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+!CODEOWNERS
+!SECURITY.md
+!LICENSE
+
 !docs/
 !docs/codex/
 !docs/codex/**
+
 !**/README.md
 !**/.gitkeep
+
+# ------------------------------------------------------------
+# Mantener configuración de GitHub y hooks del repo
+# ------------------------------------------------------------
+
+!.github/
+!.github/**
+
+!.githooks/
+!.githooks/**
