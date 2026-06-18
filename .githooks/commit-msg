@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+commit_msg_file="$1"
+commit_msg="$(head -n1 "$commit_msg_file")"
+
+pattern='^(ADD|FIX|DELETE|UPDATE|DOCS|REFACTOR|SECURITY|CHORE)\([a-z0-9._-]+\): .{3,80}$'
+
+if ! echo "$commit_msg" | grep -Eq "$pattern"; then
+  echo ""
+  echo "❌ Commit message inválido."
+  echo ""
+  echo "Formato obligatorio:"
+  echo "  TYPE(scope): short description"
+  echo ""
+  echo "Tipos permitidos:"
+  echo "  ADD, FIX, DELETE, UPDATE, DOCS, REFACTOR, SECURITY, CHORE"
+  echo ""
+  echo "Ejemplos:"
+  echo "  ADD(homepage): add initial service configuration"
+  echo "  FIX(n8n): correct secure cookie environment variable"
+  echo "  DOCS(codex): add docker compose guide"
+  echo ""
+  exit 1
+fi
