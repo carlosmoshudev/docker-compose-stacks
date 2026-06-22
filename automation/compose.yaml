@@ -92,8 +92,3 @@ services:
   # ============================================================
   
   # n8n-db: # Implementar en el futuro si se requiere.
-
-
-  networks:
-    default:
-      name: pro_automation_default
