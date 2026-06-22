@@ -1,0 +1,94 @@
+# ============================================================
+# STACK: Automation [PRODUCCIÓN]      compose.yaml
+# ------------------------------------------------------------
+# - N8N: https://n8n.io/
+# ------------------------------------------------------------
+#   Desarrollado y mantenido por Carlos Moshu        
+#   Stack de cali-home, Servidor doméstico de Carlos y Lilia
+# ============================================================
+
+name: pro_automation
+
+# ============================================================
+# BLOQUES REUTILIZABLES
+# ============================================================
+x-common-env: &common-env
+  TZ: ${TZ}
+
+x-common-labels: &common-labels
+  autoheal: "true"
+  diun.enable: "true"
+
+x-http-healthcheck: &http-healthcheck
+  interval: 1m30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
+x-default-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # ============================================================
+  # N8N
+  # ------------------------------------------------------------
+  # Herramienta de automatización de flujos de trabajo.
+  # Conecta aplicaciones y servicios para automatizar tareas
+  # repetitivas, integraciones y procesos internos.
+  # ============================================================
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:stable
+    container_name: n8n
+    restart: unless-stopped
+
+    environment:
+      <<: *common-env
+
+      NODE_ENV: production
+      GENERIC_TIMEZONE: ${TZ}
+
+      N8N_HOST: ${SERVER_HOSTNAME}
+      N8N_PORT: ${N8N_CONTAINER_PORT}
+      N8N_PROTOCOL: ${N8N_PROTOCOL}
+
+      N8N_EDITOR_BASE_URL: ${N8N_EDITOR_BASE_URL}
+      WEBHOOK_URL: ${N8N_WEBHOOK_URL}
+
+      N8N_SECURE_COOKIE: ${N8N_SECURE_COOKIE}
+      N8N_ENCRYPTION_KEY: "${N8N_ENCRYPTION_KEY}"
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+
+      N8N_PUBLIC_API_DISABLED: ${N8N_PUBLIC_API_DISABLED}
+      N8N_PUBLIC_API_ENDPOINT: ${N8N_PUBLIC_API_ENDPOINT}
+
+      N8N_METRICS: ${N8N_METRICS}
+
+      N8N_PERSONALIZATION_ENABLED: ${N8N_PERSONALIZATION_ENABLED}
+      N8N_DIAGNOSTICS_ENABLED: ${N8N_DIAGNOSTICS_ENABLED}
+
+    volumes:
+      - ${APPDATA_DIR}/n8n/appdata:/home/node/.n8n
+      - ${APPDATA_DIR}/n8n/files:/files
+    ports:
+      - "${N8N_HOST_PORT}:${N8N_CONTAINER_PORT}"
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      <<: *http-healthcheck
+      test: [ "CMD-SHELL", "wget --spider -q http://127.0.0.1:${N8N_CONTAINER_PORT}/readiness || exit 1" ]
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # N8N-DB (PostgreSQL)
+  # ------------------------------------------------------------
+  # Base de datos para N8N.
+  # ============================================================
+  
+  # n8n-db: # Implementar en el futuro si se requiere.
