@@ -1,0 +1,82 @@
+# ============================================================
+# STACK: Notifications [PRODUCCION]      compose.yaml
+# ------------------------------------------------------------
+# - Apprise API: https://github.com/caronc/apprise-api
+# ------------------------------------------------------------
+#   Desarrollado y mantenido por Carlos Moshu
+#   Stack de cali-home, servidor domestico de Carlos y Lilia
+# ============================================================
+
+name: notifications
+
+# ============================================================
+# BLOQUES REUTILIZABLES
+# ============================================================
+x-common-env: &common-env
+  TZ: ${TZ}
+  PUID: ${PUID}
+  PGID: ${PGID}
+
+x-common-labels: &common-labels
+  autoheal: "true"
+  diun.enable: "true"
+
+x-http-healthcheck: &http-healthcheck
+  interval: 1m30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
+x-default-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # ============================================================
+  # Apprise
+  # ------------------------------------------------------------
+  # Gateway centralizado para enviar notificaciones.
+  # ============================================================
+  apprise:
+    image: caronc/apprise:latest
+    container_name: apprise
+    restart: unless-stopped
+    user: "${PUID}:${PGID}"
+
+    environment:
+      <<: *common-env
+      APPRISE_STATEFUL_MODE: simple
+      APPRISE_WORKER_COUNT: "1"
+      APPRISE_ADMIN: "y"
+
+    volumes:
+      - ${APPDATA_DIR}/apprise/config:/config
+
+    ports:
+      - "${APPRISE_HOST_PORT}:${APPRISE_CONTAINER_PORT}"
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      <<: *http-healthcheck
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/status', timeout=5).read()"
+        ]
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - pro_notifications
+
+networks:
+  pro_notifications:
+    name: pro_notifications
+    driver: bridge

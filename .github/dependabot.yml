@@ -33,6 +33,7 @@ updates:
       - "/library"
       - "/media"
       - "/network"
+      - "/notifications"
       - "/productivity"
     schedule:
       interval: "weekly"

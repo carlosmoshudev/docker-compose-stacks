@@ -11,6 +11,7 @@ Este workspace agrupa varias pilas Docker Compose independientes, cada una en su
 - `library/` : audiobookshelf, calibre-web, kavita, romm, romm-db
 - `media/` : transmission, prowlarr, sonarr, radarr, bazarr, lidarr, jellyfin, jellyseerr, unpackerr, recyclarr, flaresolverr
 - `network/` : adguardhome, nginx-proxy-manager
+- `notifications/` : apprise
 - `productivity/` : it-tools, mealie
 
 ## Uso general
@@ -36,10 +37,12 @@ docker compose up -d
 - `TZ`, `SOCK`, `LOCALTIME`, `DBUS`, `MEDIA`, `DOWNLOADS` y `WATCH` son valores comunes compartidos por varias pilas.
 - `ZIGBEE_ADAPTER`, `ZIGBEE2MQTT_PORT` y `READARR_PORT` son variables opcionales para servicios comentados en sus compose.
 - El mapa mantenible de puertos esta en `PUERTOS.md`.
+- Las integraciones operativas estan en `docs/INTEGRACIONES.md`.
+- Los procedimientos de incidencia estan en `docs/RUNBOOK.md`.
+- Las rutas y criterios de backup estan en `docs/BACKUPS.md`.
 - Las ideas no aplicadas para futuros contenedores estan en `sugerencias.md` y en el `sugerencias.md` de cada stack.
 
 ## Cambios aplicados
 
 - Se estandarizaron etiquetas `autoheal`/`diun.enable` en stacks y servicios seleccionados.
 - Se añadieron healthchecks básicos en `dashboard` y `productivity` para que los servicios sean más robustos.
-
