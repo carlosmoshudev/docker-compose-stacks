@@ -52,7 +52,7 @@ services:
   # Contenedor VPN compartido por Transmission.
   # ============================================================
   transmission-gluetun:
-    image: qmcgaw/gluetun:v3.40.3 # Version estable para post port forward script.
+    image: qmcgaw/gluetun:v3.41.1 # Version estable para post port forward script.
     container_name: transmission-gluetun
     restart: unless-stopped
 
