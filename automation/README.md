@@ -10,12 +10,12 @@ Este directorio contiene el stack de `n8n`.
 ## Setup
 
 ```powershell
-Copy-Item ..\.env.example .\.env
+Copy-Item .\.env.example .\.env
 notepad .\.env
 docker compose up -d
 ```
 
 ## Notas
 
-- Ajusta `N8N_PORT` según tu configuración.
+- Ajusta `N8N_HOST_PORT` y `N8N_CONTAINER_PORT` según tu configuración.
 - Mantén `TZ` actualizado en todas las pilas.

@@ -1,0 +1,430 @@
+# ============================================================
+# STACK: Media [PRODUCCION]      compose.yaml
+# ------------------------------------------------------------
+# - Gluetun:      https://github.com/qdm12/gluetun
+# - Transmission: https://transmissionbt.com/
+# - Prowlarr:     https://prowlarr.com/
+# - Sonarr:       https://sonarr.tv/
+# - Radarr:       https://radarr.video/
+# - Bazarr:       https://www.bazarr.media/
+# - Lidarr:       https://lidarr.audio/
+# - Readarr:      https://readarr.com/
+# - Jellyfin:     https://jellyfin.org/
+# - Jellyseerr:   https://github.com/Fallenbagel/jellyseerr
+# - Unpackerr:    https://github.com/Unpackerr/unpackerr
+# - Recyclarr:    https://recyclarr.dev/
+# - FlareSolverr: https://github.com/FlareSolverr/FlareSolverr
+# ------------------------------------------------------------
+#   Desarrollado y mantenido por Carlos Moshu
+#   Stack de cali-home, servidor domestico de Carlos y Lilia
+# ============================================================
+
+name: media
+
+# ============================================================
+# BLOQUES REUTILIZABLES
+# ============================================================
+x-common-env: &common-env
+  TZ: ${TZ}
+
+x-linuxserver-env: &linuxserver-env
+  PUID: "1000"
+  PGID: "1000"
+  TZ: ${TZ}
+
+x-common-labels: &common-labels
+  autoheal: "true"
+  diun.enable: "true"
+
+x-diun-labels: &diun-labels
+  diun.enable: "true"
+
+x-default-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # ============================================================
+  # Transmission Gluetun
+  # ------------------------------------------------------------
+  # Contenedor VPN compartido por Transmission.
+  # ============================================================
+  transmission-gluetun:
+    image: qmcgaw/gluetun:v3.40.3 # Version estable para post port forward script.
+    container_name: transmission-gluetun
+    restart: unless-stopped
+
+    cap_add:
+      - NET_ADMIN
+
+    devices:
+      - /dev/net/tun:/dev/net/tun
+
+    environment:
+      TZ: ${TZ}
+      VPN_SERVICE_PROVIDER: ${VPN_PROVIDER}
+      VPN_TYPE: openvpn
+      OPENVPN_USER: ${VPN_USER}+pmp
+      OPENVPN_PASSWORD: ${VPN_PASSWORD}
+      VPN_PORT_FORWARDING: "on"
+      VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh /gluetun/post_port_forward.sh
+      VPN_PORT_FORWARDING_DOWN_COMMAND: /bin/sh -c "echo port forwarding down"
+      VPN_INTERFACE_MTU: "1320"
+      PORT_FORWARD_ONLY: "on"
+      UPDATER_PERIOD: "0"
+      DOT: "off"
+      BLOCK_MALICIOUS: "off"
+
+    volumes:
+      - ./scripts/post_port_forward.sh:/gluetun/post_port_forward.sh:ro
+
+    ports:
+      - "${TRANSMISSION_PORT}:9091"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Transmission
+  # ------------------------------------------------------------
+  # Cliente BitTorrent aislado a traves de Gluetun.
+  # ============================================================
+  transmission:
+    image: lscr.io/linuxserver/transmission:latest
+    container_name: transmission
+    restart: unless-stopped
+    network_mode: "service:transmission-gluetun"
+
+    depends_on:
+      - transmission-gluetun
+
+    environment:
+      <<: *linuxserver-env
+
+    volumes:
+      - ./data/transmission:/config
+      - ${DOWNLOADS}:/data/downloads
+      - ${WATCH}:/watch
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Prowlarr
+  # ------------------------------------------------------------
+  # Gestion centralizada de indexadores.
+  # ============================================================
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+
+    environment:
+      <<: *linuxserver-env
+
+    volumes:
+      - ./data/prowlarr:/config
+
+    ports:
+      - "${PROWLARR_PORT}:9696"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Sonarr
+  # ------------------------------------------------------------
+  # Automatizacion de series.
+  # ============================================================
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+
+    environment:
+      <<: *linuxserver-env
+
+    volumes:
+      - ./data/sonarr:/config
+      - ${MEDIA}:/data/media
+      - ${DOWNLOADS}:/data/downloads
+
+    ports:
+      - "${SONARR_PORT}:8989"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Radarr
+  # ------------------------------------------------------------
+  # Automatizacion de peliculas.
+  # ============================================================
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+
+    environment:
+      <<: *linuxserver-env
+
+    volumes:
+      - ./data/radarr:/config
+      - ${MEDIA}:/data/media
+      - ${DOWNLOADS}:/data/downloads
+
+    ports:
+      - "${RADARR_PORT}:7878"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Bazarr
+  # ------------------------------------------------------------
+  # Gestion y descarga de subtitulos.
+  # ============================================================
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    restart: unless-stopped
+
+    environment:
+      <<: *linuxserver-env
+
+    volumes:
+      - ./data/bazarr:/config
+      - ${MEDIA}:/data/media
+
+    ports:
+      - "${BAZARR_PORT}:6767"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Lidarr
+  # ------------------------------------------------------------
+  # Automatizacion de musica.
+  # ============================================================
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    restart: unless-stopped
+
+    environment:
+      <<: *linuxserver-env
+
+    volumes:
+      - ./data/lidarr:/config
+      - ${MEDIA}:/data/media
+      - ${DOWNLOADS}:/data/downloads
+
+    ports:
+      - "${LIDARR_PORT}:8686"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Readarr
+  # ------------------------------------------------------------
+  # Automatizacion de libros.
+  # ============================================================
+  #readarr:
+  #  image: lscr.io/linuxserver/readarr:latest
+  #  container_name: readarr
+  #  restart: unless-stopped
+#
+  #  environment:
+  #    <<: *linuxserver-env
+#
+  #  volumes:
+  #    - ./data/readarr:/config
+  #    - ${MEDIA}:/data/media
+  #    - ${DOWNLOADS}:/data/downloads
+#
+  #  ports:
+  #    - "${READARR_PORT}:8787"
+#
+  #  labels:
+  #    <<: *common-labels
+#
+  #  logging:
+  #    <<: *default-logging
+
+  # ============================================================
+  # Jellyfin
+  # ------------------------------------------------------------
+  # Servidor multimedia.
+  # ============================================================
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+
+    environment:
+      <<: *linuxserver-env
+
+    volumes:
+      - ./data/jellyfin:/config
+      - ${MEDIA}:/data/media:ro
+      - ${TRANSCODE_CACHE}:/transcode
+
+    ports:
+      - "${JELLYFIN_PORT}:8096"
+      - "${JELLYFIN_DISCOVERY_PORT}:7359/udp"
+      - "${JELLYFIN_DLNA_PORT}:1900/udp"
+
+    devices:
+      - /dev/dri:/dev/dri
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Jellyseerr
+  # ------------------------------------------------------------
+  # Solicitudes de contenido para Jellyfin.
+  # ============================================================
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    restart: unless-stopped
+
+    depends_on:
+      - jellyfin
+      - sonarr
+      - radarr
+
+    environment:
+      TZ: ${TZ}
+      LOG_LEVEL: info
+
+    volumes:
+      - ./data/jellyseerr:/app/config
+
+    ports:
+      - "${JELLYSEERR_PORT}:5055"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Unpackerr
+  # ------------------------------------------------------------
+  # Extraccion automatica de descargas para servicios *arr.
+  # ============================================================
+  unpackerr:
+    image: golift/unpackerr:latest
+    container_name: unpackerr
+    restart: unless-stopped
+    user: "1000:1000"
+
+    depends_on:
+      - sonarr
+      - radarr
+      - lidarr
+
+    environment:
+      TZ: ${TZ}
+      UN_SONARR_0_URL: http://cali-home:${SONARR_PORT}
+      UN_SONARR_0_API_KEY: ${SONARR_API_KEY}
+      UN_SONARR_0_PATHS_0: /data/downloads
+      UN_RADARR_0_URL: http://cali-home:${RADARR_PORT}
+      UN_RADARR_0_API_KEY: ${RADARR_API_KEY}
+      UN_RADARR_0_PATHS_0: /data/downloads
+      UN_LIDARR_0_URL: http://cali-home:${LIDARR_PORT}
+      UN_LIDARR_0_API_KEY: ${LIDARR_API_KEY}
+      UN_LIDARR_0_PATHS_0: /data/downloads
+      UN_DELETE_ORIG: "false"
+      UN_INTERVAL: 2m
+      UN_START_DELAY: 1m
+
+    volumes:
+      - ${DOWNLOADS}:/data/downloads
+
+    labels:
+      <<: *diun-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Recyclarr
+  # ------------------------------------------------------------
+  # Sincronizacion de perfiles de calidad para Sonarr/Radarr.
+  # ============================================================
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr:latest
+    container_name: recyclarr
+    restart: unless-stopped
+    user: "1000:1000"
+
+    depends_on:
+      - sonarr
+      - radarr
+
+    environment:
+      <<: *common-env
+
+    volumes:
+      - ./data/recyclarr:/config
+
+    labels:
+      <<: *diun-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # FlareSolverr
+  # ------------------------------------------------------------
+  # Resolucion de desafios web para indexadores compatibles.
+  # ============================================================
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+
+    environment:
+      TZ: ${TZ}
+      LOG_LEVEL: info
+
+    ports:
+      - "${FLARESOLVERR_PORT}:8191"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging

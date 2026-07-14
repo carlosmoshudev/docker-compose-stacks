@@ -129,7 +129,8 @@ Las variables específicas de un servicio deben usar prefijo con el nombre del s
 
 ```dotenv
 N8N_HOST=n8n.cali.home
-N8N_PORT=5678
+N8N_HOST_PORT=5678
+N8N_CONTAINER_PORT=5678
 N8N_PROTOCOL=https
 ```
 
@@ -158,8 +159,8 @@ No debe versionarse nunca.
 Ejemplo:
 
 ```dotenv
-SERVICENAMEA_DB_PASSWORD=valor-real-privado
-TELEGRAM_TOKEN=token-real-privado
+SERVICENAMEA_DB_PASSWORD=VALOR_REAL_PRIVADO
+TELEGRAM_TOKEN=VALOR_REAL_PRIVADO
 ```
 
 ## `.env.example`
@@ -176,8 +177,8 @@ TELEGRAM_TOKEN=CHANGEME
 Ejemplo incorrecto:
 
 ```dotenv
-SERVICENAMEA_DB_PASSWORD=password123
-TELEGRAM_TOKEN=0000000001:AAAbbCCdEf1gH_IjKl2M34n5o_pq-RsTTT
+SERVICENAMEA_DB_PASSWORD=password_de_ejemplo
+TELEGRAM_TOKEN=token_con_formato_realista
 ```
 
 Aunque sean valores falsos, no deben parecer secretos reales.

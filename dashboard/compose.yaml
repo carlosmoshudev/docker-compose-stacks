@@ -1,0 +1,144 @@
+# ============================================================
+# STACK: Dashboard [PRODUCCION]      compose.yaml
+# ------------------------------------------------------------
+# - Homepage: https://gethomepage.dev/
+# - Homarr:   https://homarr.dev/
+# - Glances:  https://nicolargo.github.io/glances/
+# ------------------------------------------------------------
+#   Desarrollado y mantenido por Carlos Moshu
+#   Stack de cali-home, servidor domestico de Carlos y Lilia
+# ============================================================
+
+name: dashboard
+
+# ============================================================
+# BLOQUES REUTILIZABLES
+# ============================================================
+x-common-env: &common-env
+  TZ: ${TZ}
+  PUID: ${PUID}
+  PGID: ${PGID}
+
+x-common-labels: &common-labels
+  autoheal: "true"
+  diun.enable: "true"
+
+x-http-healthcheck: &http-healthcheck
+  interval: 1m30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
+x-default-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # ============================================================
+  # Homepage
+  # ------------------------------------------------------------
+  # Panel principal para organizar servicios y enlaces internos.
+  # ============================================================
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    restart: unless-stopped
+
+    group_add:
+      - "984"
+
+    environment:
+      <<: *common-env
+      HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_ALLOWED_HOSTS}
+
+    volumes:
+      - ${APPDATA_DIR}/homepage:/app/config
+      - ${DRIVES_PATH}/disk-a:/mnt/a:ro
+      - ${DRIVES_PATH}/disk-b:/mnt/b:ro
+      - ${SOCK}:${SOCK}:ro
+
+    ports:
+      - "${HOMEPAGE_HOST_PORT}:${HOMEPAGE_CONTAINER_PORT}"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Homarr
+  # ------------------------------------------------------------
+  # Dashboard para agrupar aplicaciones, integraciones y widgets.
+  # ============================================================
+  homarr:
+    image: ghcr.io/homarr-labs/homarr:latest
+    container_name: homarr
+    restart: unless-stopped
+
+    environment:
+      <<: *common-env
+      SECRET_ENCRYPTION_KEY: ${HOMARR_KEY}
+
+    volumes:
+      - ${APPDATA_DIR}/homarr:/appdata
+      - ${SOCK}:${SOCK}:ro
+
+    ports:
+      - "${HOMARR_HOST_PORT}:${HOMARR_CONTAINER_PORT}"
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      <<: *http-healthcheck
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:7575/api/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ]
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Glances
+  # ------------------------------------------------------------
+  # Monitor de sistema en tiempo real con interfaz web.
+  # ============================================================
+  glances:
+    image: nicolargo/glances:latest
+    container_name: glances
+    restart: unless-stopped
+
+    pid: host
+
+    environment:
+      GLANCES_OPT: -w
+
+    volumes:
+      - ${SOCK}:${SOCK}
+
+    ports:
+      - "${GLANCES_HOST_WEB_PORT}:${GLANCES_CONTAINER_WEB_PORT}"
+      - "${GLANCES_HOST_API_PORT}:${GLANCES_CONTAINER_API_PORT}"
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      <<: *http-healthcheck
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:61208/api/4/version', timeout=5).read()"
+        ]
+
+    logging:
+      <<: *default-logging
