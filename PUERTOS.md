@@ -47,6 +47,7 @@ Documento mantenible para revisar exposicion de servicios Docker. Los valores sa
 | network | npm http | `NPM_HTTP_PORT` | 80 | 80 | TCP | Proxy HTTP | Entrada publica si aplica |
 | network | npm https | `NPM_HTTPS_PORT` | 443 | 443 | TCP | Proxy HTTPS | Entrada publica si aplica |
 | network | npm admin | `NPM_ADMIN_PORT` | 81 | 81 | TCP | Admin NPM | Sensible: no exponer a Internet |
+| notifications | apprise | `APPRISE_HOST_PORT` | 8000 | `APPRISE_CONTAINER_PORT` / 8000 | TCP | Gateway de notificaciones | LAN o proxy protegido, nunca Internet directo |
 | productivity | it-tools | `ITTOOLS_PORT` | 8083 | 80 | TCP | Herramientas tecnicas | Red local o proxy |
 | productivity | mealie | `MEALIE_PORT` | 9925 | 9000 | TCP | Recetas | Red local o proxy |
 
