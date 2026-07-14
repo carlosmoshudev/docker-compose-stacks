@@ -33,8 +33,8 @@ DATABASE_PASSWORD=CHANGEME
 Ejemplo incorrecto:
 
 ```dotenv
-TELEGRAM_TOKEN=123456789:AA...
-DATABASE_PASSWORD=password123
+TELEGRAM_TOKEN=token_con_formato_realista
+DATABASE_PASSWORD=password_de_ejemplo
 ```
 
 ## Si se filtra un secreto

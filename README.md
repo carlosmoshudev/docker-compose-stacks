@@ -15,20 +15,14 @@ Este workspace agrupa varias pilas Docker Compose independientes, cada una en su
 
 ## Uso general
 
-1. Para variables comunes al workspace, edita el archivo raíz:
-
-```powershell
-notepad .\.env.example
-```
-
-2. Para cada stack, copia su ejemplo local y ajusta los valores:
+1. Para cada stack, copia su ejemplo local y ajusta los valores:
 
 ```powershell
 Copy-Item .\<stack>\.env.example .\<stack>\.env
 notepad .\<stack>\.env
 ```
 
-3. Entra en la carpeta del stack y ejecuta:
+2. Entra en la carpeta del stack y ejecuta:
 
 ```powershell
 cd .\<stack>
@@ -40,7 +34,7 @@ docker compose up -d
 - No se recomienda versionar los archivos `.<stack>/.env` si contienen claves o credenciales.
 - `COMPOSE_PROJECT_NAME` es utilizado para identificar cada proyecto Compose.
 - `TZ`, `SOCK`, `LOCALTIME`, `DBUS`, `MEDIA`, `DOWNLOADS` y `WATCH` son valores comunes compartidos por varias pilas.
-- `ZIGBEE_ADAPTER` y `ZIGBEE2MQTT_PORT` son variables opcionales para servicios comentados en `home/compose.yaml`.
+- `ZIGBEE_ADAPTER`, `ZIGBEE2MQTT_PORT` y `READARR_PORT` son variables opcionales para servicios comentados en sus compose.
 - El mapa mantenible de puertos esta en `PUERTOS.md`.
 - Las ideas no aplicadas para futuros contenedores estan en `sugerencias.md` y en el `sugerencias.md` de cada stack.
 

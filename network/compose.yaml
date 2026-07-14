@@ -1,0 +1,85 @@
+# ============================================================
+# STACK: Network [PRODUCCION]      compose.yaml
+# ------------------------------------------------------------
+# - AdGuard Home:        https://adguard.com/adguard-home.html
+# - Nginx Proxy Manager: https://nginxproxymanager.com/
+# ------------------------------------------------------------
+#   Desarrollado y mantenido por Carlos Moshu
+#   Stack de cali-home, servidor domestico de Carlos y Lilia
+# ============================================================
+
+name: network
+
+# ============================================================
+# BLOQUES REUTILIZABLES
+# ============================================================
+x-common-env: &common-env
+  TZ: ${TZ}
+
+x-common-labels: &common-labels
+  autoheal: "true"
+  diun.enable: "true"
+
+x-default-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # ============================================================
+  # AdGuard Home
+  # ------------------------------------------------------------
+  # DNS local con filtrado de publicidad y panel web.
+  # ============================================================
+  adguardhome:
+    image: adguard/adguardhome:latest
+    container_name: adguardhome
+    restart: unless-stopped
+
+    environment:
+      <<: *common-env
+
+    volumes:
+      - ./data/adguardhome/work:/opt/adguardhome/work
+      - ./data/adguardhome/conf:/opt/adguardhome/conf
+
+    ports:
+      - "${ADGUARD_DNS_PORT}:53/tcp"
+      - "${ADGUARD_DNS_PORT}:53/udp"
+      - "${ADGUARD_INIT_PORT}:3000/tcp"
+      - "${ADGUARD_HTTP_PORT}:80/tcp"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Nginx Proxy Manager
+  # ------------------------------------------------------------
+  # Proxy inverso con gestion de certificados y hosts.
+  # ============================================================
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+
+    environment:
+      <<: *common-env
+
+    volumes:
+      - ./data/nginx-proxy-manager/data:/data
+      - ./data/nginx-proxy-manager/letsencrypt:/etc/letsencrypt
+
+    ports:
+      - "${NPM_HTTP_PORT}:80"
+      - "${NPM_HTTPS_PORT}:443"
+      - "${NPM_ADMIN_PORT}:81"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging

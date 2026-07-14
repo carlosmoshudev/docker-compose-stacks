@@ -1,0 +1,183 @@
+# ============================================================
+# STACK: Home [PRODUCCION]      compose.yaml
+# ------------------------------------------------------------
+# - ESPHome:        https://esphome.io/
+# - Home Assistant: https://www.home-assistant.io/
+# - Matter Server:  https://github.com/home-assistant-libs/python-matter-server
+# - Mosquitto:      https://mosquitto.org/
+# - Node-RED:       https://nodered.org/
+# ------------------------------------------------------------
+#   Desarrollado y mantenido por Carlos Moshu
+#   Stack de cali-home, servidor domestico de Carlos y Lilia
+# ============================================================
+
+name: home
+
+# ============================================================
+# BLOQUES REUTILIZABLES
+# ============================================================
+x-common-env: &common-env
+  TZ: ${TZ}
+
+x-common-labels: &common-labels
+  autoheal: "true"
+  diun.enable: "true"
+
+x-default-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # ============================================================
+  # ESPHome
+  # ------------------------------------------------------------
+  # Gestion y compilacion de dispositivos ESPHome.
+  # ============================================================
+  esphome:
+    image: ghcr.io/esphome/esphome:latest
+    container_name: esphome
+    restart: unless-stopped
+
+    environment:
+      <<: *common-env
+
+    volumes:
+      - ./data/esphome:/config
+      - ${LOCALTIME}:${LOCALTIME}:ro
+
+    ports:
+      - "${ESPHOME_PORT}:6052"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # frigate:
+  # go2rtc:
+  # zwave-js-ui:
+
+  # ============================================================
+  # Home Assistant
+  # ------------------------------------------------------------
+  # Plataforma principal de automatizacion del hogar.
+  # ============================================================
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    network_mode: host
+    privileged: true
+    restart: unless-stopped
+
+    environment:
+      <<: *common-env
+
+    volumes:
+      - ./data/homeassistant:/config
+      - ${LOCALTIME}:${LOCALTIME}:ro
+      - ${DBUS}:${DBUS}:ro
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Matter Server
+  # ------------------------------------------------------------
+  # Backend Matter usado por Home Assistant.
+  # ============================================================
+  matter-server:
+    image: ghcr.io/home-assistant-libs/python-matter-server:stable
+    container_name: matter-server
+    restart: unless-stopped
+    network_mode: host
+
+    security_opt:
+      - apparmor:unconfined
+
+    volumes:
+      - ./data/matter-server:/data
+      - ${DBUS}:${DBUS}:ro
+
+    command: --storage-path /data --paa-root-cert-dir /data/credentials --bluetooth-adapter 0
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Mosquitto
+  # ------------------------------------------------------------
+  # Broker MQTT para integraciones domesticas.
+  # ============================================================
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
+    restart: unless-stopped
+
+    environment:
+      <<: *common-env
+
+    volumes:
+      - ./data/mosquitto/config:/mosquitto/config
+      - ./data/mosquitto/data:/mosquitto/data
+      - ./data/mosquitto/log:/mosquitto/log
+
+    ports:
+      - "${MQTT_PORT}:1883"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Node-RED
+  # ------------------------------------------------------------
+  # Automatizaciones visuales e integraciones internas.
+  # ============================================================
+  nodered:
+    image: nodered/node-red:latest
+    container_name: nodered
+    restart: unless-stopped
+
+    environment:
+      <<: *common-env
+
+    volumes:
+      - ./data/nodered:/data
+
+    ports:
+      - "${NODERED_PORT}:1880"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # zigbee2mqtt:
+  #   image: koenkk/zigbee2mqtt:latest
+  #   container_name: zigbee2mqtt
+  #   restart: unless-stopped
+  #   environment:
+  #     TZ: ${TZ}
+  #   ports:
+  #     - "${ZIGBEE2MQTT_PORT}:8080"
+  #   volumes:
+  #     - ./data/zigbee2mqtt:/app/data
+  #     - /run/udev:/run/udev:ro
+  #   devices:
+  #     - ${ZIGBEE_ADAPTER}:/dev/ttyACM0
+  #   depends_on:
+  #     - mosquitto
+  #   labels:
+  #     <<: *common-labels

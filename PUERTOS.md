@@ -36,7 +36,6 @@ Documento mantenible para revisar exposicion de servicios Docker. Los valores sa
 | media | radarr | `RADARR_PORT` | 7878 | 7878 | TCP | Peliculas | Sensible por API keys |
 | media | bazarr | `BAZARR_PORT` | 6767 | 6767 | TCP | Subtitulos | Red local/proxy |
 | media | lidarr | `LIDARR_PORT` | 8686 | 8686 | TCP | Musica | Sensible por API keys |
-| media | readarr | `READARR_PORT` | 8787 | 8787 | TCP | Libros | Sensible por API keys |
 | media | jellyfin | `JELLYFIN_PORT` | 8096 | 8096 | TCP | Streaming multimedia | Proxy recomendado si sale a Internet |
 | media | jellyfin discovery | `JELLYFIN_DISCOVERY_PORT` | 7359 | 7359 | UDP | Descubrimiento local | Mantener solo LAN |
 | media | jellyfin DLNA | `JELLYFIN_DLNA_PORT` | 7360 | 1900 | UDP | DLNA local | Mantener solo LAN |
@@ -63,3 +62,4 @@ Documento mantenible para revisar exposicion de servicios Docker. Los valores sa
 | media | transmission | Red compartida con `transmission-gluetun` | La UI sale por el puerto de Gluetun |
 | media | unpackerr | Red Docker/salidas HTTP | No requiere UI |
 | media | recyclarr | Tarea interna | No requiere UI |
+| media | readarr | Servicio comentado | Si se activa, documentar `READARR_PORT` como puerto publicado |

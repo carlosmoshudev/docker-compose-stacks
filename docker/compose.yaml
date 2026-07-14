@@ -1,0 +1,238 @@
+# ============================================================
+# STACK: Docker [PRODUCCIÓN]      compose.yaml    no evaluado
+# ------------------------------------------------------------
+# - Autoheal:   http://autoheal.github.io/
+# - Dozzle:     http://dozzle.dev/
+# - DIUN:       http://diun.dev/
+# - Netdata:    http://netdata.dev/
+# - Portainer:  http://portainer.dev/
+# - Scrutiny:   http://scrutiny.dev/
+# ------------------------------------------------------------
+#   Desarrollado y mantenido por Carlos Moshu
+#   Stack de cali-home, Servidor doméstico de Carlos y Lilia
+# ============================================================
+
+name: docker
+
+# ============================================================
+# BLOQUES REUTILIZABLES
+# ============================================================
+
+x-common-env: &common-env
+  TZ: ${TZ}
+  PUID: ${PUID}
+  PGID: ${PGID}
+
+x-common-labels: &common-labels
+  autoheal: "true"
+  diun.enable: "true"
+
+x-http-healthcheck: &http-healthcheck
+  interval: 1m30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
+x-default-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # ============================================================
+  # Autoheal
+  # ------------------------------------------------------------
+  # Servicio supervisor y auto-reparador de contenedores
+  # ============================================================
+  autoheal:
+    image: willfarrell/autoheal:latest
+    container_name: autoheal
+    restart: unless-stopped
+
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: "autoheal"
+      TZ: "${TZ}"
+
+    volumes:
+      - ${SOCK}:${SOCK}
+
+    labels:
+      diun.enable: "true"
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Dozzle
+  # ------------------------------------------------------------
+  # Servicio de visualización de logs en tiempo real
+  # ============================================================
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    restart: unless-stopped
+
+    environment:
+      TZ: "${TZ}"
+
+    volumes:
+      - ${SOCK}:${SOCK}:ro
+
+    ports:
+      - "${DOZZLE_HOST_PORT}:${DOZZLE_CONTAINER_PORT}"
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      <<: *http-healthcheck
+      test: ["CMD", "/dozzle", "healthcheck"]
+
+    logging:
+      <<: *default-logging
+
+
+
+  # ============================================================
+  # DIUN
+  # ------------------------------------------------------------
+  # Servicio de monitoreo de actualizaciones de contenedores
+  # ============================================================
+  diun:
+    image: crazymax/diun:latest
+    container_name: diun
+    restart: unless-stopped
+
+    command: serve
+
+    environment:
+      TZ: "${TZ}"
+      LOG_LEVEL: "info"
+      LOG_JSON: "false"
+      DIUN_PROVIDERS_DOCKER: "true"
+      DIUN_PROVIDERS_DOCKER_WATCHBYDEFAULT: "false"
+      DIUN_PROVIDERS_DOCKER_WATCHSTOPPED: "true"
+      DIUN_WATCH_SCHEDULE: "${DIUN_WATCH_SCHEDULE}"
+      DIUN_NOTIF_TELEGRAM_TOKEN: "${TELEGRAM_TOKEN}"
+      DIUN_NOTIF_TELEGRAM_CHATIDS: "${TELEGRAM_CHATIDS}"
+
+    volumes:
+      - ${APPDATA_DIR}/diun:/data
+      - ${SOCK}:${SOCK}:ro
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Netdata
+  # ------------------------------------------------------------
+  # Servicio de monitoreo y visualización de datos de sistema
+  # ============================================================
+  netdata:
+    image: netdata/netdata:stable
+    container_name: netdata
+    restart: unless-stopped
+
+    hostname: ${SERVER_HOSTNAME}
+
+    security_opt:
+      - apparmor:unconfined
+
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+
+    environment:
+      TZ: "${TZ}"
+      NETDATA_HEALTHCHECK_TARGET: "cli"
+
+    volumes:
+      - ${APPDATA_DIR}/netdata/config:/etc/netdata
+      - ${APPDATA_DIR}/netdata/lib:/var/lib/netdata
+      - ${APPDATA_DIR}/netdata/cache:/var/cache/netdata
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - ${SOCK}:${SOCK}:ro
+
+    ports:
+      - "${NETDATA_HOST_PORT}:${NETDATA_CONTAINER_PORT}"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Portainer
+  # ------------------------------------------------------------
+  # Servicio de administración y visualización de contenedores
+  # ============================================================
+  portainer:
+    image: portainer/portainer-ee:latest
+    container_name: portainer
+    restart: unless-stopped
+
+    security_opt:
+      - no-new-privileges:true
+
+    volumes:
+      - ${APPDATA_DIR}/portainer:/data
+      - ${LOCALTIME}:${LOCALTIME}:ro
+      - ${SOCK}:${SOCK}
+
+    ports:
+      - "${PORTAINER_HOST_PORT}:${PORTAINER_CONTAINER_PORT}"
+
+    labels:
+      <<: *common-labels
+
+    logging:
+      <<: *default-logging
+
+  # ============================================================
+  # Scrutiny
+  # ------------------------------------------------------------
+  # Servicio de monitoreo y visualización de estado de discos
+  # ============================================================
+  scrutiny:
+    image: ghcr.io/analogj/scrutiny:v0.8.6-omnibus
+    container_name: scrutiny
+    restart: unless-stopped
+
+    cap_add:
+      - SYS_RAWIO
+      - SYS_ADMIN
+
+    environment:
+      TZ: "${TZ}"
+
+    volumes:
+      - /run/udev:/run/udev:ro
+      - ${APPDATA_DIR}/scrutiny/config:/opt/scrutiny/config
+      - ${APPDATA_DIR}/scrutiny/influxdb:/opt/scrutiny/influxdb
+
+    ports:
+      - "${SCRUTINY_HOST_PORT}:${SCRUTINY_CONTAINER_PORT}"
+      - "${SCRUTINY_INFLUXDB_HOST_PORT}:${SCRUTINY_INFLUXDB_CONTAINER_PORT}"
+
+    devices:
+      - /dev/sda:/dev/sda
+      - /dev/sdb:/dev/sdb
+      - /dev/sdc:/dev/sdc
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      <<: *http-healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:${SCRUTINY_CONTAINER_PORT}"]
+
+    logging:
+      <<: *default-logging
