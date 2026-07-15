@@ -53,6 +53,8 @@ services:
 
     volumes:
       - ${APPDATA_DIR}/apprise/config:/config
+      - ${APPDATA_DIR}/apprise/attach:/attach
+      - ${APPDATA_DIR}/apprise/plugin:/plugin
 
     ports:
       - "${APPRISE_HOST_PORT}:${APPRISE_CONTAINER_PORT}"

@@ -6,7 +6,7 @@ Mapa operativo de integraciones entre servicios del homelab.
 
 | Origen | Evento | Destino | Metodo | Tags sugeridos | Prueba |
 | --- | --- | --- | --- | --- | --- |
-| DIUN | Actualizaciones de imagenes | Apprise | Apprise API | `docker`, `updates` | Lanzar DIUN en modo prueba o esperar ciclo programado |
+| DIUN | Actualizaciones de imagenes | n8n -> Apprise | Webhook HTTP con cabecera `Cali-Notify-Key` | `docker`, `updates` | Lanzar DIUN en modo prueba o esperar ciclo programado |
 | Recyclarr | Cambios o errores de sincronizacion | Apprise | Apprise API | `media`, `updates` | Ejecutar sincronizacion manual |
 | n8n | Workflows internos | Apprise | HTTP request | `critical`, `home` | Workflow manual con payload de prueba |
 | Bazarr | Eventos de subtitulos | Apprise | Webhook/API si se configura | `media` | Envio manual desde el servicio |
@@ -18,6 +18,15 @@ Mapa operativo de integraciones entre servicios del homelab.
 - URL LAN recomendada: `http://cali-home:8000`.
 - Clave sugerida: `homelab`.
 - Tags base: `critical`, `docker`, `media`, `home`, `updates`.
+
+## DIUN hacia n8n
+
+- Endpoint: `http://cali-home:5678/webhook/notifications`.
+- En `docker/compose.yaml` el puerto se documenta como `N8N_NOTIFICATIONS_PORT` para no hardcodear `5678`.
+- La clave se envia en la cabecera `Cali-Notify-Key`.
+- La clave real debe vivir en `docker/.env` como `CALI_NOTIFY_KEY`.
+- DIUN no envia ya a Telegram directamente; n8n decide el destino final y puede reenviar a Apprise.
+- El workflow de n8n debe rechazar peticiones sin cabecera valida antes de llamar a Apprise.
 
 ## Bot de Telegram
 
