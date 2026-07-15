@@ -45,5 +45,7 @@ curl http://cali-home:8000/status
 ## Notas
 
 - La configuracion persistente vive en `./data/apprise/config`.
+- Los adjuntos persistentes viven en `./data/apprise/attach`.
+- Los plugins persistentes viven en `./data/apprise/plugin`.
 - No guardar tokens reales en este repositorio.
 - `latest` se usa porque la documentacion del proyecto lo define como build estable. Tras validar en produccion puede fijarse version o digest.
