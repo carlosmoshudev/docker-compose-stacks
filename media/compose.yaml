@@ -39,6 +39,12 @@ x-common-labels: &common-labels
 x-diun-labels: &diun-labels
   diun.enable: "true"
 
+x-http-healthcheck: &http-healthcheck
+  interval: 1m30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
 x-default-logging: &default-logging
   driver: "json-file"
   options:
@@ -86,6 +92,10 @@ services:
     labels:
       <<: *common-labels
 
+    healthcheck:
+      <<: *http-healthcheck
+      test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
+
     logging:
       <<: *default-logging
 
@@ -114,6 +124,10 @@ services:
     labels:
       <<: *common-labels
 
+    healthcheck:
+      <<: *http-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9091/transmission/web/ >/dev/null || exit 1"]
+
     logging:
       <<: *default-logging
 
@@ -138,6 +152,10 @@ services:
 
     labels:
       <<: *common-labels
+
+    healthcheck:
+      <<: *http-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9696/ping >/dev/null || exit 1"]
 
     logging:
       <<: *default-logging
@@ -166,6 +184,10 @@ services:
     labels:
       <<: *common-labels
 
+    healthcheck:
+      <<: *http-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8989/ping >/dev/null || exit 1"]
+
     logging:
       <<: *default-logging
 
@@ -193,6 +215,10 @@ services:
     labels:
       <<: *common-labels
 
+    healthcheck:
+      <<: *http-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:7878/ping >/dev/null || exit 1"]
+
     logging:
       <<: *default-logging
 
@@ -218,6 +244,10 @@ services:
 
     labels:
       <<: *common-labels
+
+    healthcheck:
+      <<: *http-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:6767/ >/dev/null || exit 1"]
 
     logging:
       <<: *default-logging
@@ -245,6 +275,10 @@ services:
 
     labels:
       <<: *common-labels
+
+    healthcheck:
+      <<: *http-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8686/ping >/dev/null || exit 1"]
 
     logging:
       <<: *default-logging
@@ -305,6 +339,10 @@ services:
     labels:
       <<: *common-labels
 
+    healthcheck:
+      <<: *http-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8096/health >/dev/null || exit 1"]
+
     logging:
       <<: *default-logging
 
@@ -335,6 +373,16 @@ services:
 
     labels:
       <<: *common-labels
+
+    healthcheck:
+      <<: *http-healthcheck
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:5055').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ]
 
     logging:
       <<: *default-logging
@@ -425,6 +473,16 @@ services:
 
     labels:
       <<: *common-labels
+
+    healthcheck:
+      <<: *http-healthcheck
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8191/health', timeout=5).read()"
+        ]
 
     logging:
       <<: *default-logging

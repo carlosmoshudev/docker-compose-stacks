@@ -27,6 +27,9 @@ x-common-labels: &common-labels
   autoheal: "true"
   diun.enable: "true"
 
+x-diun-labels: &diun-labels
+  diun.enable: "true"
+
 x-http-healthcheck: &http-healthcheck
   interval: 1m30s
   timeout: 10s
@@ -118,6 +121,7 @@ services:
         http://${N8N_NOTIFICATIONS_HOST}:${N8N_NOTIFICATIONS_PORT}${N8N_NOTIFICATIONS_PATH}
       DIUN_NOTIF_WEBHOOK_METHOD: "POST"
       "DIUN_NOTIF_WEBHOOK_HEADERS_Cali-Notify-Key": "${CALI_NOTIFY_KEY}"
+      "DIUN_NOTIF_WEBHOOK_HEADERS_Cali-Notify-Source": "diun"
       "DIUN_NOTIF_WEBHOOK_HEADERS_Content-Type": "application/json"
       DIUN_NOTIF_WEBHOOK_TIMEOUT: "${DIUN_NOTIF_WEBHOOK_TIMEOUT}"
 
@@ -125,7 +129,7 @@ services:
       - ${APPDATA_DIR}/diun:/data
       - ${SOCK}:${SOCK}:ro
     labels:
-      <<: *common-labels
+      <<: *diun-labels
 
     logging:
       <<: *default-logging
@@ -170,6 +174,10 @@ services:
     labels:
       <<: *common-labels
 
+    healthcheck:
+      <<: *http-healthcheck
+      test: ["CMD", "netdatacli", "ping"]
+
     logging:
       <<: *default-logging
 
@@ -195,7 +203,7 @@ services:
       - "${PORTAINER_HOST_PORT}:${PORTAINER_CONTAINER_PORT}"
 
     labels:
-      <<: *common-labels
+      <<: *diun-labels
 
     logging:
       <<: *default-logging

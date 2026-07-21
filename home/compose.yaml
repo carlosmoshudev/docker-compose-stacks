@@ -23,6 +23,15 @@ x-common-labels: &common-labels
   autoheal: "true"
   diun.enable: "true"
 
+x-diun-labels: &diun-labels
+  diun.enable: "true"
+
+x-http-healthcheck: &http-healthcheck
+  interval: 1m30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
 x-default-logging: &default-logging
   driver: "json-file"
   options:
@@ -52,6 +61,16 @@ services:
 
     labels:
       <<: *common-labels
+
+    healthcheck:
+      <<: *http-healthcheck
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:6052', timeout=5).read()"
+        ]
 
     logging:
       <<: *default-logging
@@ -83,6 +102,16 @@ services:
     labels:
       <<: *common-labels
 
+    healthcheck:
+      <<: *http-healthcheck
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8123', timeout=5).read()"
+        ]
+
     logging:
       <<: *default-logging
 
@@ -107,7 +136,7 @@ services:
     command: --storage-path /data --paa-root-cert-dir /data/credentials --bluetooth-adapter 0
 
     labels:
-      <<: *common-labels
+      <<: *diun-labels
 
     logging:
       <<: *default-logging
@@ -134,7 +163,7 @@ services:
       - "${MQTT_PORT}:1883"
 
     labels:
-      <<: *common-labels
+      <<: *diun-labels
 
     logging:
       <<: *default-logging
@@ -160,6 +189,16 @@ services:
 
     labels:
       <<: *common-labels
+
+    healthcheck:
+      <<: *http-healthcheck
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:1880').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ]
 
     logging:
       <<: *default-logging

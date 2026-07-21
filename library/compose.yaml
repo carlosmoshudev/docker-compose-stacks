@@ -28,6 +28,15 @@ x-common-labels: &common-labels
   autoheal: "true"
   diun.enable: "true"
 
+x-diun-labels: &diun-labels
+  diun.enable: "true"
+
+x-http-healthcheck: &http-healthcheck
+  interval: 1m30s
+  timeout: 10s
+  retries: 3
+  start_period: 30s
+
 x-default-logging: &default-logging
   driver: "json-file"
   options:
@@ -59,7 +68,7 @@ services:
       - "${AUDIOBOOK_PORT}:80"
 
     labels:
-      <<: *common-labels
+      <<: *diun-labels
 
     logging:
       <<: *default-logging
@@ -87,6 +96,10 @@ services:
     labels:
       <<: *common-labels
 
+    healthcheck:
+      <<: *http-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8083/ >/dev/null || exit 1"]
+
     logging:
       <<: *default-logging
 
@@ -112,6 +125,10 @@ services:
     labels:
       <<: *common-labels
 
+    healthcheck:
+      <<: *http-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:5000/ >/dev/null || exit 1"]
+
     logging:
       <<: *default-logging
 
@@ -126,7 +143,8 @@ services:
     restart: unless-stopped
 
     depends_on:
-      - romm-db
+      romm-db:
+        condition: service_healthy
 
     environment:
       DB_HOST: ${ROMM_DB_HOST}
@@ -154,6 +172,10 @@ services:
     labels:
       <<: *common-labels
 
+    healthcheck:
+      <<: *http-healthcheck
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/ >/dev/null || exit 1"]
+
     logging:
       <<: *default-logging
 
@@ -179,6 +201,13 @@ services:
 
     labels:
       <<: *common-labels
+
+    healthcheck:
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 1m
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent || exit 1"]
 
     logging:
       <<: *default-logging

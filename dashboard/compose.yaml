@@ -23,6 +23,9 @@ x-common-labels: &common-labels
   autoheal: "true"
   diun.enable: "true"
 
+x-diun-labels: &diun-labels
+  diun.enable: "true"
+
 x-http-healthcheck: &http-healthcheck
   interval: 1m30s
   timeout: 10s
@@ -63,7 +66,7 @@ services:
       - "${HOMEPAGE_HOST_PORT}:${HOMEPAGE_CONTAINER_PORT}"
 
     labels:
-      <<: *common-labels
+      <<: *diun-labels
 
     logging:
       <<: *default-logging
