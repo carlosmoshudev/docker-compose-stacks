@@ -14,7 +14,6 @@ No se debe anadir `autoheal=true` a un servicio sin healthcheck real. En ese cas
 
 | Stack | Servicio | Healthcheck |
 | --- | --- | --- |
-| `automation` | `n8n-db` | `pg_isready` |
 | `automation` | `n8n` | HTTP interno |
 | `dashboard` | `glances` | `http://127.0.0.1:61208/api/4/version` |
 | `dashboard` | `homarr` | `http://127.0.0.1:7575/api/health/ready` |
