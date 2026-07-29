@@ -40,4 +40,4 @@ Se puede reutilizar el bot de Home Assistant si Apprise solo envia mensajes. La 
 - AFFiNE puede actuar como espacio de notas/documentos y probar integraciones de IA. Mantener claves de proveedores fuera del repositorio.
 - Vikunja puede recibir tareas desde n8n, RSS o Telegram si se decide centralizar pendientes.
 - FreshRSS puede reducir correos de notificaciones y concentrar lectura tecnica en feeds.
-- Reactive Resume queda en `lab/reactive-resume/` hasta validar si merece promocionarse.
+- Reactive Resume queda en `__lab_reactive-resume/` hasta validar si merece promocionarse.

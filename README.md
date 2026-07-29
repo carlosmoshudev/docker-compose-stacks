@@ -5,18 +5,18 @@ Este workspace agrupa varias pilas Docker Compose independientes, cada una en su
 ## Estructura
 
 - `automation/` : n8n
-- `affine/` : AFFiNE, postgres, redis
+- `__lab_affine/` : AFFiNE, postgres, redis en laboratorio temporal
 - `dashboard/` : homepage, homarr, glances
 - `docker/` : autoheal, dozzle, diun, netdata, portainer, scrutiny
-- `freshrss/` : FreshRSS
+- `__lab_freshrss/` : FreshRSS en laboratorio temporal
 - `home/` : esphome, homeassistant, matter-server, mosquitto, nodered
-- `lab/reactive-resume/` : Reactive Resume en laboratorio
+- `__lab_reactive-resume/` : Reactive Resume en laboratorio temporal
 - `library/` : audiobookshelf, calibre-web, kavita, romm, romm-db
 - `media/` : transmission, prowlarr, sonarr, radarr, bazarr, lidarr, jellyfin, jellyseerr, unpackerr, recyclarr, flaresolverr
 - `network/` : adguardhome, nginx-proxy-manager
 - `notifications/` : apprise
 - `productivity/` : it-tools, mealie
-- `vikunja/` : Vikunja, postgres
+- `__lab_vikunja/` : Vikunja, postgres en laboratorio temporal
 
 ## Uso general
 
@@ -40,7 +40,7 @@ docker compose up -d
 - `COMPOSE_PROJECT_NAME` es utilizado para identificar cada proyecto Compose.
 - `TZ`, `SOCK`, `LOCALTIME`, `DBUS`, `MEDIA`, `DOWNLOADS` y `WATCH` son valores comunes compartidos por varias pilas.
 - `ZIGBEE_ADAPTER`, `ZIGBEE2MQTT_PORT` y `READARR_PORT` son variables opcionales para servicios comentados en sus compose.
-- Los stacks bajo `lab/` son pruebas aisladas y no deben asumirse como produccion hasta moverlos y documentarlo.
+- Los stacks con prefijo `__lab_` son pruebas aisladas y no deben asumirse como produccion hasta moverlos, renombrarlos y documentarlo.
 - El mapa mantenible de puertos esta en `PUERTOS.md`.
 - Las integraciones operativas estan en `docs/INTEGRACIONES.md`.
 - Los procedimientos de incidencia estan en `docs/RUNBOOK.md`.

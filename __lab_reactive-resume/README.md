@@ -1,6 +1,6 @@
 # Reactive Resume LAB stack
 
-Este stack de laboratorio contiene Reactive Resume para probar creacion y edicion de CVs. Esta separado bajo `lab/` porque puede ser temporal y moverlo a produccion deberia ser una decision posterior.
+Este stack de laboratorio contiene Reactive Resume para probar creacion y edicion de CVs. Esta separado bajo `__lab_reactive-resume/` porque puede ser temporal y moverlo a produccion deberia ser una decision posterior.
 
 ## Servicios
 
@@ -42,4 +42,3 @@ docker compose ps
 docker compose logs --tail=100 reactive-resume
 curl http://cali-home:3015/api/health
 ```
-

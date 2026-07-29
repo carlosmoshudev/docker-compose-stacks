@@ -8,7 +8,7 @@
 #   Stack de cali-home, servidor domestico de Carlos y Lilia
 # ============================================================
 
-name: pro_vikunja
+name: lab_vikunja
 
 # ============================================================
 # BLOQUES REUTILIZABLES
@@ -105,4 +105,3 @@ networks:
   vikunja-net:
     name: vikunja-net
     driver: bridge
-

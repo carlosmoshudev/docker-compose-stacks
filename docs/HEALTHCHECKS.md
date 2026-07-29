@@ -14,9 +14,9 @@ No se debe anadir `autoheal=true` a un servicio sin healthcheck real. En ese cas
 
 | Stack | Servicio | Healthcheck |
 | --- | --- | --- |
-| `affine` | `affine` | HTTP interno en `3010` |
-| `affine` | `affine-db` | `pg_isready` |
-| `affine` | `affine-redis` | `redis-cli` |
+| `__lab_affine` | `affine` | HTTP interno en `3010` |
+| `__lab_affine` | `affine-db` | `pg_isready` |
+| `__lab_affine` | `affine-redis` | `redis-cli` |
 | `automation` | `n8n-db` | `pg_isready` |
 | `automation` | `n8n` | HTTP interno |
 | `dashboard` | `glances` | `http://127.0.0.1:61208/api/4/version` |
@@ -27,11 +27,11 @@ No se debe anadir `autoheal=true` a un servicio sin healthcheck real. En ese cas
 | `home` | `esphome` | HTTP interno en `6052` |
 | `home` | `homeassistant` | HTTP interno en `8123` |
 | `home` | `nodered` | HTTP interno en `1880` |
-| `freshrss` | `freshrss` | HTTP interno |
-| `lab/reactive-resume` | `reactive-resume` | `/api/health` |
-| `lab/reactive-resume` | `reactive-resume-db` | `pg_isready` |
-| `lab/reactive-resume` | `reactive-resume-redis` | `redis-cli ping` |
-| `lab/reactive-resume` | `reactive-resume-seaweedfs` | HTTP interno SeaweedFS |
+| `__lab_freshrss` | `freshrss` | HTTP interno |
+| `__lab_reactive-resume` | `reactive-resume` | `/api/health` |
+| `__lab_reactive-resume` | `reactive-resume-db` | `pg_isready` |
+| `__lab_reactive-resume` | `reactive-resume-redis` | `redis-cli ping` |
+| `__lab_reactive-resume` | `reactive-resume-seaweedfs` | HTTP interno SeaweedFS |
 | `library` | `calibre-web` | HTTP interno |
 | `library` | `kavita` | HTTP interno |
 | `library` | `romm` | HTTP interno |
@@ -50,7 +50,7 @@ No se debe anadir `autoheal=true` a un servicio sin healthcheck real. En ese cas
 | `notifications` | `apprise` | `/status` |
 | `productivity` | `it-tools` | HTTP interno |
 | `productivity` | `mealie` | `/api/app/about` |
-| `vikunja` | `vikunja-db` | `pg_isready` |
+| `__lab_vikunja` | `vikunja-db` | `pg_isready` |
 
 ## Servicios vigilados por DIUN sin autoheal
 
@@ -64,12 +64,12 @@ Estos servicios se vigilan para actualizaciones, pero no se reinician automatica
 | `docker` | `portainer` | Imagen minimalista sin tooling interno fiable para Compose. |
 | `home` | `matter-server` | Servicio host/network sensible; evitar reinicios automaticos por check debil. |
 | `home` | `mosquitto` | El check correcto depende de credenciales MQTT reales. |
-| `lab/reactive-resume` | `reactive-resume-create-bucket` | Job de inicializacion, no servicio continuo. |
+| `__lab_reactive-resume` | `reactive-resume-create-bucket` | Job de inicializacion, no servicio continuo. |
 | `library` | `audiobookshelf` | La documentacion oficial no recomienda healthchecks salvo monitorizacion externa; puede generar ruido en arranques lentos. |
 | `media` | `recyclarr` | Tarea/sincronizador, no servicio web continuo critico. |
 | `media` | `unpackerr` | Proceso worker sin endpoint HTTP de salud necesario. |
 | `network` | `adguardhome` | El proyecto retiro el Docker HEALTHCHECK por problemas operativos. |
-| `vikunja` | `vikunja` | Servicio web vigilado por DIUN; no se fuerza autoheal hasta validar endpoint interno estable en la imagen. |
+| `__lab_vikunja` | `vikunja` | Servicio web vigilado por DIUN; no se fuerza autoheal hasta validar endpoint interno estable en la imagen. |
 
 ## Fuentes usadas
 

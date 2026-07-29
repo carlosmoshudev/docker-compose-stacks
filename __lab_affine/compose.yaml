@@ -9,7 +9,7 @@
 #   Stack de cali-home, servidor domestico de Carlos y Lilia
 # ============================================================
 
-name: pro_affine
+name: lab_affine
 
 # ============================================================
 # BLOQUES REUTILIZABLES
@@ -184,4 +184,3 @@ networks:
   affine-net:
     name: affine-net
     driver: bridge
-

@@ -7,7 +7,7 @@
 #   Stack de cali-home, servidor domestico de Carlos y Lilia
 # ============================================================
 
-name: pro_freshrss
+name: lab_freshrss
 
 # ============================================================
 # BLOQUES REUTILIZABLES
@@ -64,4 +64,3 @@ networks:
   freshrss-net:
     name: freshrss-net
     driver: bridge
-
