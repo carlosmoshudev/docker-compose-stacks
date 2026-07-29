@@ -1,0 +1,239 @@
+# ============================================================
+# STACK: Reactive Resume [LAB]      compose.yaml
+# ------------------------------------------------------------
+# - Reactive Resume: https://rxresu.me/
+# - Postgres:        https://www.postgresql.org/
+# - Redis:           https://redis.io/
+# - SeaweedFS:       https://github.com/seaweedfs/seaweedfs
+# ------------------------------------------------------------
+#   Desarrollado y mantenido por Carlos Moshu
+#   Stack de cali-home, servidor domestico de Carlos y Lilia
+# ============================================================
+
+name: lab_reactive_resume
+
+# ============================================================
+# BLOQUES REUTILIZABLES
+# ============================================================
+x-common-labels: &common-labels
+  autoheal: "true"
+  diun.enable: "true"
+
+x-diun-labels: &diun-labels
+  diun.enable: "true"
+
+x-default-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # ============================================================
+  # Reactive Resume
+  # ------------------------------------------------------------
+  # App de laboratorio para crear y probar CVs.
+  # ============================================================
+  reactive-resume:
+    image: ghcr.io/amruthpillai/reactive-resume:latest
+    container_name: reactive-resume
+    restart: unless-stopped
+
+    depends_on:
+      reactive-resume-db:
+        condition: service_healthy
+      reactive-resume-redis:
+        condition: service_healthy
+      reactive-resume-seaweedfs:
+        condition: service_healthy
+      reactive-resume-create-bucket:
+        condition: service_completed_successfully
+
+    environment:
+      TZ: ${TZ}
+      PORT: ${REACTIVE_RESUME_CONTAINER_PORT}
+      APP_URL: ${REACTIVE_RESUME_APP_URL}
+      DATABASE_URL: postgresql://${REACTIVE_RESUME_DB_USER}:${REACTIVE_RESUME_DB_PASSWORD}@reactive-resume-db:5432/${REACTIVE_RESUME_DB_NAME}
+      AUTH_SECRET: ${REACTIVE_RESUME_AUTH_SECRET}
+      REDIS_URL: redis://reactive-resume-redis:6379
+      ENCRYPTION_SECRET: ${REACTIVE_RESUME_ENCRYPTION_SECRET}
+      S3_ACCESS_KEY_ID: ${REACTIVE_RESUME_S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${REACTIVE_RESUME_S3_SECRET_ACCESS_KEY}
+      S3_REGION: us-east-1
+      S3_ENDPOINT: http://reactive-resume-seaweedfs:8333
+      S3_BUCKET: ${REACTIVE_RESUME_S3_BUCKET}
+      S3_FORCE_PATH_STYLE: "true"
+      FLAG_DISABLE_SIGNUPS: ${REACTIVE_RESUME_DISABLE_SIGNUPS}
+      FLAG_DISABLE_EMAIL_AUTH: ${REACTIVE_RESUME_DISABLE_EMAIL_AUTH}
+      FLAG_DISABLE_IMAGE_PROCESSING: ${REACTIVE_RESUME_DISABLE_IMAGE_PROCESSING}
+      FLAG_SHOW_SPONSORS: "false"
+
+    volumes:
+      - ${APPDATA_DIR}/app:/app/data
+
+    ports:
+      - "${REACTIVE_RESUME_HOST_PORT}:${REACTIVE_RESUME_CONTAINER_PORT}"
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ]
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - reactive-resume-data-net
+      - reactive-resume-storage-net
+
+  # ============================================================
+  # Reactive Resume DB
+  # ------------------------------------------------------------
+  # Base de datos PostgreSQL interna para Reactive Resume.
+  # ============================================================
+  reactive-resume-db:
+    image: postgres:16-alpine
+    container_name: reactive-resume-db
+    restart: unless-stopped
+
+    environment:
+      TZ: ${TZ}
+      POSTGRES_DB: ${REACTIVE_RESUME_DB_NAME}
+      POSTGRES_USER: ${REACTIVE_RESUME_DB_USER}
+      POSTGRES_PASSWORD: ${REACTIVE_RESUME_DB_PASSWORD}
+
+    volumes:
+      - ${APPDATA_DIR}/postgres:/var/lib/postgresql/data
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      test: ["CMD-SHELL", "pg_isready -U ${REACTIVE_RESUME_DB_USER} -d ${REACTIVE_RESUME_DB_NAME}"]
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - reactive-resume-data-net
+
+  # ============================================================
+  # Reactive Resume Redis
+  # ------------------------------------------------------------
+  # Cola/cache interna usada por Reactive Resume.
+  # ============================================================
+  reactive-resume-redis:
+    image: redis:7-alpine
+    container_name: reactive-resume-redis
+    restart: unless-stopped
+
+    command: redis-server --appendonly yes
+
+    volumes:
+      - ${APPDATA_DIR}/redis:/data
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+      test: ["CMD", "redis-cli", "ping"]
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - reactive-resume-data-net
+
+  # ============================================================
+  # Reactive Resume SeaweedFS
+  # ------------------------------------------------------------
+  # Almacenamiento S3 local para adjuntos y assets del laboratorio.
+  # ============================================================
+  reactive-resume-seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    container_name: reactive-resume-seaweedfs
+    restart: unless-stopped
+
+    command: server -s3 -filer -dir=/data -ip=0.0.0.0
+
+    environment:
+      AWS_ACCESS_KEY_ID: ${REACTIVE_RESUME_S3_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${REACTIVE_RESUME_S3_SECRET_ACCESS_KEY}
+
+    volumes:
+      - ${APPDATA_DIR}/seaweedfs:/data
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8888"]
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - reactive-resume-storage-net
+
+  # ============================================================
+  # Reactive Resume bucket
+  # ------------------------------------------------------------
+  # Job de creacion del bucket S3 local si no existe.
+  # ============================================================
+  reactive-resume-create-bucket:
+    image: quay.io/minio/mc:latest
+    container_name: reactive-resume-create-bucket
+    restart: on-failure
+
+    entrypoint: >
+      /bin/sh -c "
+        sleep 5;
+        mc alias set seaweedfs http://reactive-resume-seaweedfs:8333 ${REACTIVE_RESUME_S3_ACCESS_KEY_ID} ${REACTIVE_RESUME_S3_SECRET_ACCESS_KEY};
+        mc mb --ignore-existing seaweedfs/${REACTIVE_RESUME_S3_BUCKET};
+        exit 0;
+      "
+
+    depends_on:
+      reactive-resume-seaweedfs:
+        condition: service_healthy
+
+    labels:
+      <<: *diun-labels
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - reactive-resume-storage-net
+
+networks:
+  reactive-resume-data-net:
+    name: reactive-resume-data-net
+    driver: bridge
+  reactive-resume-storage-net:
+    name: reactive-resume-storage-net
+    driver: bridge
+

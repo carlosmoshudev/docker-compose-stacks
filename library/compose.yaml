@@ -118,7 +118,8 @@ services:
 
     volumes:
       - ./data/kavita:/config
-      - ${MEDIA}:/data
+      - ${MEDIA}/comics:/data/comics:ro
+      - ${MEDIA}/books:/data/books:ro
     ports:
       - "${KAVITA_PORT}:5000"
 

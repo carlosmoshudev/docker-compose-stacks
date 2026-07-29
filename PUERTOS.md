@@ -13,6 +13,7 @@ Documento mantenible para revisar exposicion de servicios Docker. Los valores sa
 
 | Stack | Servicio | Variable host | Host | Contenedor | Protocolo | Uso | Nota |
 | --- | --- | ---: | ---: | ---: | --- | --- | --- |
+| affine | affine | `AFFINE_HOST_PORT` | 3010 | `AFFINE_CONTAINER_PORT` / 3010 | TCP | Notas/documentos/pizarra | Red local o proxy protegido |
 | automation | n8n | `N8N_HOST_PORT` | 5678 | `N8N_CONTAINER_PORT` / 5678 | TCP | Automatizaciones | Publicar preferiblemente detras de proxy con autenticacion |
 | dashboard | homepage | `HOMEPAGE_HOST_PORT` | 3000 | `HOMEPAGE_CONTAINER_PORT` / 3000 | TCP | Dashboard principal | Red local o proxy |
 | dashboard | homarr | `HOMARR_HOST_PORT` | 7575 | `HOMARR_CONTAINER_PORT` / 7575 | TCP | Dashboard alternativo | Red local o proxy |
@@ -23,12 +24,14 @@ Documento mantenible para revisar exposicion de servicios Docker. Los valores sa
 | docker | scrutiny | `SCRUTINY_HOST_PORT` | 8082 | `SCRUTINY_CONTAINER_PORT` / 8080 | TCP | Salud de discos | Red local |
 | docker | scrutiny influxdb | `SCRUTINY_INFLUXDB_HOST_PORT` | 18086 | `SCRUTINY_INFLUXDB_CONTAINER_PORT` / 8086 | TCP | Base de datos interna Scrutiny | Valorar retirar publicacion si no se consulta desde fuera |
 | docker | netdata | `NETDATA_HOST_PORT` | 19999 | `NETDATA_CONTAINER_PORT` / 19999 | TCP | Monitorizacion sistema | Sensible: red local/proxy autenticado |
+| freshrss | freshrss | `FRESHRSS_HOST_PORT` | 8087 | `FRESHRSS_CONTAINER_PORT` / 80 | TCP | Lector RSS | Red local o proxy |
 | home | esphome | `ESPHOME_PORT` | 6052 | 6052 | TCP | ESPHome | Red local |
 | home | mosquitto | `MQTT_PORT` | 1883 | 1883 | TCP | MQTT | No exponer a Internet sin TLS/autenticacion |
 | home | nodered | `NODERED_PORT` | 1880 | 1880 | TCP | Automatizaciones visuales | Sensible: proteger con login/proxy |
 | library | audiobookshelf | `AUDIOBOOK_PORT` | 13378 | 80 | TCP | Audiolibros/podcasts | Red local o proxy |
 | library | calibre-web | `CALIBRE_PORT` | 8084 | 8083 | TCP | Biblioteca Calibre | Red local o proxy |
 | library | kavita | `KAVITA_PORT` | 5000 | 5000 | TCP | Comics/libros | Red local o proxy |
+| lab/reactive-resume | reactive-resume | `REACTIVE_RESUME_HOST_PORT` | 3015 | `REACTIVE_RESUME_CONTAINER_PORT` / 3000 | TCP | CVs y pruebas | Laboratorio, no exponer sin proxy |
 | library | romm | `ROMM_PORT` | 8085 | 8080 | TCP | ROMs | Red local o proxy |
 | media | transmission-gluetun | `TRANSMISSION_PORT` | 9091 | 9091 | TCP | UI Transmission via VPN | Sensible: red local/proxy autenticado |
 | media | prowlarr | `PROWLARR_PORT` | 9696 | 9696 | TCP | Indexadores | Sensible por API keys |
@@ -50,11 +53,15 @@ Documento mantenible para revisar exposicion de servicios Docker. Los valores sa
 | notifications | apprise | `APPRISE_HOST_PORT` | 8000 | `APPRISE_CONTAINER_PORT` / 8000 | TCP | Gateway de notificaciones | LAN o proxy protegido, nunca Internet directo |
 | productivity | it-tools | `ITTOOLS_PORT` | 8083 | 80 | TCP | Herramientas tecnicas | Red local o proxy |
 | productivity | mealie | `MEALIE_PORT` | 9925 | 9000 | TCP | Recetas | Red local o proxy |
+| vikunja | vikunja | `VIKUNJA_HOST_PORT` | 3456 | `VIKUNJA_CONTAINER_PORT` / 3456 | TCP | Tareas/proyectos | Red local o proxy |
 
 ## Servicios sin puerto publicado
 
 | Stack | Servicio | Acceso esperado | Nota |
 | --- | --- | --- | --- |
+| affine | affine-db | Red Docker del stack | PostgreSQL con pgvector |
+| affine | affine-migration | Job interno | Ejecuta migraciones antes de AFFiNE |
+| affine | affine-redis | Red Docker del stack | Cache interna |
 | docker | autoheal | Docker socket | No requiere UI |
 | docker | diun | Tarea interna/notificaciones | No requiere UI |
 | home | homeassistant | `network_mode: host` | Escucha desde la red host, normalmente `8123` |
@@ -64,3 +71,8 @@ Documento mantenible para revisar exposicion de servicios Docker. Los valores sa
 | media | unpackerr | Red Docker/salidas HTTP | No requiere UI |
 | media | recyclarr | Tarea interna | No requiere UI |
 | media | readarr | Servicio comentado | Si se activa, documentar `READARR_PORT` como puerto publicado |
+| lab/reactive-resume | reactive-resume-create-bucket | Job interno | Crea bucket S3 local |
+| lab/reactive-resume | reactive-resume-db | Red Docker del stack | PostgreSQL interno |
+| lab/reactive-resume | reactive-resume-redis | Red Docker del stack | Redis interno |
+| lab/reactive-resume | reactive-resume-seaweedfs | Red Docker del stack | S3 local para laboratorio |
+| vikunja | vikunja-db | Red Docker del stack | PostgreSQL interno |

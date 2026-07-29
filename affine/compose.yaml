@@ -1,0 +1,187 @@
+# ============================================================
+# STACK: AFFiNE [PRODUCCION]      compose.yaml
+# ------------------------------------------------------------
+# - AFFiNE:   https://affine.pro/
+# - Postgres: https://www.postgresql.org/
+# - Redis:    https://redis.io/
+# ------------------------------------------------------------
+#   Desarrollado y mantenido por Carlos Moshu
+#   Stack de cali-home, servidor domestico de Carlos y Lilia
+# ============================================================
+
+name: pro_affine
+
+# ============================================================
+# BLOQUES REUTILIZABLES
+# ============================================================
+x-common-labels: &common-labels
+  autoheal: "true"
+  diun.enable: "true"
+
+x-diun-labels: &diun-labels
+  diun.enable: "true"
+
+x-default-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # ============================================================
+  # AFFiNE
+  # ------------------------------------------------------------
+  # Workspace colaborativo local para notas, documentos y pizarras.
+  # ============================================================
+  affine:
+    image: ghcr.io/toeverything/affine:${AFFINE_REVISION:-stable}
+    container_name: affine
+    restart: unless-stopped
+
+    depends_on:
+      affine-redis:
+        condition: service_healthy
+      affine-db:
+        condition: service_healthy
+      affine-migration:
+        condition: service_completed_successfully
+
+    environment:
+      TZ: ${TZ}
+      REDIS_SERVER_HOST: affine-redis
+      DATABASE_URL: postgresql://${AFFINE_DB_USER}:${AFFINE_DB_PASSWORD}@affine-db:5432/${AFFINE_DB_NAME}
+      AFFINE_INDEXER_ENABLED: "false"
+
+    volumes:
+      - ${APPDATA_DIR}/affine/storage:/root/.affine/storage
+      - ${APPDATA_DIR}/affine/config:/root/.affine/config
+
+    ports:
+      - "${AFFINE_HOST_PORT}:${AFFINE_CONTAINER_PORT}"
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      interval: 1m
+      timeout: 10s
+      retries: 5
+      start_period: 1m
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3010').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ]
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - affine-net
+
+  # ============================================================
+  # AFFiNE migration
+  # ------------------------------------------------------------
+  # Job oficial de predeploy/migracion antes de arrancar AFFiNE.
+  # ============================================================
+  affine-migration:
+    image: ghcr.io/toeverything/affine:${AFFINE_REVISION:-stable}
+    container_name: affine-migration
+    restart: "no"
+
+    depends_on:
+      affine-redis:
+        condition: service_healthy
+      affine-db:
+        condition: service_healthy
+
+    command: ["sh", "-c", "node ./scripts/self-host-predeploy.js"]
+
+    environment:
+      TZ: ${TZ}
+      REDIS_SERVER_HOST: affine-redis
+      DATABASE_URL: postgresql://${AFFINE_DB_USER}:${AFFINE_DB_PASSWORD}@affine-db:5432/${AFFINE_DB_NAME}
+      AFFINE_INDEXER_ENABLED: "false"
+
+    volumes:
+      - ${APPDATA_DIR}/affine/storage:/root/.affine/storage
+      - ${APPDATA_DIR}/affine/config:/root/.affine/config
+
+    labels:
+      <<: *diun-labels
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - affine-net
+
+  # ============================================================
+  # AFFiNE Redis
+  # ------------------------------------------------------------
+  # Cache interna para AFFiNE. No se publica en el host.
+  # ============================================================
+  affine-redis:
+    image: redis:7-alpine
+    container_name: affine-redis
+    restart: unless-stopped
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - affine-net
+
+  # ============================================================
+  # AFFiNE DB
+  # ------------------------------------------------------------
+  # PostgreSQL con pgvector, requerido por AFFiNE self-hosted.
+  # ============================================================
+  affine-db:
+    image: pgvector/pgvector:pg16
+    container_name: affine-db
+    restart: unless-stopped
+
+    environment:
+      TZ: ${TZ}
+      POSTGRES_DB: ${AFFINE_DB_NAME}
+      POSTGRES_USER: ${AFFINE_DB_USER}
+      POSTGRES_PASSWORD: ${AFFINE_DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+
+    volumes:
+      - ${APPDATA_DIR}/postgres:/var/lib/postgresql/data
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      test: ["CMD-SHELL", "pg_isready -U ${AFFINE_DB_USER} -d ${AFFINE_DB_NAME}"]
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - affine-net
+
+networks:
+  affine-net:
+    name: affine-net
+    driver: bridge
+

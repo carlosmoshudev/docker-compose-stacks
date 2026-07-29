@@ -1,0 +1,108 @@
+# ============================================================
+# STACK: Vikunja [PRODUCCION]      compose.yaml
+# ------------------------------------------------------------
+# - Vikunja:  https://vikunja.io/
+# - Postgres: https://www.postgresql.org/
+# ------------------------------------------------------------
+#   Desarrollado y mantenido por Carlos Moshu
+#   Stack de cali-home, servidor domestico de Carlos y Lilia
+# ============================================================
+
+name: pro_vikunja
+
+# ============================================================
+# BLOQUES REUTILIZABLES
+# ============================================================
+x-common-labels: &common-labels
+  autoheal: "true"
+  diun.enable: "true"
+
+x-diun-labels: &diun-labels
+  diun.enable: "true"
+
+x-default-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # ============================================================
+  # Vikunja
+  # ------------------------------------------------------------
+  # Gestor de tareas y proyectos.
+  # ============================================================
+  vikunja:
+    image: vikunja/vikunja:latest
+    container_name: vikunja
+    restart: unless-stopped
+
+    depends_on:
+      vikunja-db:
+        condition: service_healthy
+
+    environment:
+      TZ: ${TZ}
+      VIKUNJA_SERVICE_PUBLICURL: ${VIKUNJA_PUBLIC_URL}
+      VIKUNJA_SERVICE_JWTSECRET: ${VIKUNJA_SERVICE_SECRET}
+      VIKUNJA_DATABASE_TYPE: postgres
+      VIKUNJA_DATABASE_HOST: vikunja-db
+      VIKUNJA_DATABASE_DATABASE: ${VIKUNJA_DB_NAME}
+      VIKUNJA_DATABASE_USER: ${VIKUNJA_DB_USER}
+      VIKUNJA_DATABASE_PASSWORD: ${VIKUNJA_DB_PASSWORD}
+
+    volumes:
+      - ${APPDATA_DIR}/vikunja/files:/app/vikunja/files
+
+    ports:
+      - "${VIKUNJA_HOST_PORT}:${VIKUNJA_CONTAINER_PORT}"
+
+    labels:
+      <<: *diun-labels
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - vikunja-net
+
+  # ============================================================
+  # Vikunja DB
+  # ------------------------------------------------------------
+  # Base de datos PostgreSQL interna para Vikunja.
+  # ============================================================
+  vikunja-db:
+    image: postgres:16-alpine
+    container_name: vikunja-db
+    restart: unless-stopped
+
+    environment:
+      TZ: ${TZ}
+      POSTGRES_DB: ${VIKUNJA_DB_NAME}
+      POSTGRES_USER: ${VIKUNJA_DB_USER}
+      POSTGRES_PASSWORD: ${VIKUNJA_DB_PASSWORD}
+
+    volumes:
+      - ${APPDATA_DIR}/postgres:/var/lib/postgresql/data
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      test: ["CMD-SHELL", "pg_isready -U ${VIKUNJA_DB_USER} -d ${VIKUNJA_DB_NAME}"]
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - vikunja-net
+
+networks:
+  vikunja-net:
+    name: vikunja-net
+    driver: bridge
+

@@ -1,0 +1,67 @@
+# ============================================================
+# STACK: FreshRSS [PRODUCCION]      compose.yaml
+# ------------------------------------------------------------
+# - FreshRSS: https://freshrss.org/
+# ------------------------------------------------------------
+#   Desarrollado y mantenido por Carlos Moshu
+#   Stack de cali-home, servidor domestico de Carlos y Lilia
+# ============================================================
+
+name: pro_freshrss
+
+# ============================================================
+# BLOQUES REUTILIZABLES
+# ============================================================
+x-common-labels: &common-labels
+  autoheal: "true"
+  diun.enable: "true"
+
+x-default-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # ============================================================
+  # FreshRSS
+  # ------------------------------------------------------------
+  # Lector RSS local para centralizar fuentes sin depender del email.
+  # ============================================================
+  freshrss:
+    image: freshrss/freshrss:latest
+    container_name: freshrss
+    restart: unless-stopped
+
+    environment:
+      TZ: ${TZ}
+      CRON_MIN: ${FRESHRSS_CRON_MIN}
+
+    volumes:
+      - ${APPDATA_DIR}/freshrss/data:/var/www/FreshRSS/data
+      - ${APPDATA_DIR}/freshrss/extensions:/var/www/FreshRSS/extensions
+
+    ports:
+      - "${FRESHRSS_HOST_PORT}:${FRESHRSS_CONTAINER_PORT}"
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      interval: 1m
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/ >/dev/null || wget -q --spider http://127.0.0.1/ || exit 1"]
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - freshrss-net
+
+networks:
+  freshrss-net:
+    name: freshrss-net
+    driver: bridge
+

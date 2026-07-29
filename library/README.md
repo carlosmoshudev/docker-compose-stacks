@@ -19,3 +19,4 @@ docker compose up -d
 
 - Las credenciales de `romm-db` deben mantenerse privadas.
 - Ajusta `MEDIA` si tu ruta de librería local cambia.
+- Kavita monta solo `${MEDIA}/comics` y `${MEDIA}/books` como lectura (`:ro`). Si reorganizas la biblioteca, actualiza esas rutas en `compose.yaml` y revisa permisos antes de levantar el contenedor.

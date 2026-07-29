@@ -11,6 +11,8 @@ Mapa operativo de integraciones entre servicios del homelab.
 | n8n | Workflows internos | Apprise | HTTP request | `critical`, `home` | Workflow manual con payload de prueba |
 | Bazarr | Eventos de subtitulos | Apprise | Webhook/API si se configura | `media` | Envio manual desde el servicio |
 | Home Assistant | Comandos y automatizaciones interactivas | Telegram | Integracion nativa HA | `home`, `critical` | Servicio `notify` o comando del bot |
+| FreshRSS | Articulos/fuentes seleccionadas | n8n o Vikunja | API/RSS/filtro manual | `rss`, `reading` | Probar con una fuente de GitHub releases |
+| Vikunja | Tareas y recordatorios | Calendario/n8n | API, CalDAV o iCal | `home`, `tasks` | Crear tarea de prueba desde n8n |
 
 ## Apprise
 
@@ -32,3 +34,10 @@ Mapa operativo de integraciones entre servicios del homelab.
 ## Bot de Telegram
 
 Se puede reutilizar el bot de Home Assistant si Apprise solo envia mensajes. La regla importante es que solo Home Assistant debe recibir comandos o hacer polling/webhook de entrada. Apprise no necesita leer mensajes de Telegram para enviar alertas.
+
+## Apps nuevas en evaluacion
+
+- AFFiNE puede actuar como espacio de notas/documentos y probar integraciones de IA. Mantener claves de proveedores fuera del repositorio.
+- Vikunja puede recibir tareas desde n8n, RSS o Telegram si se decide centralizar pendientes.
+- FreshRSS puede reducir correos de notificaciones y concentrar lectura tecnica en feeds.
+- Reactive Resume queda en `lab/reactive-resume/` hasta validar si merece promocionarse.
