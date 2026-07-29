@@ -49,12 +49,13 @@ services:
     container_name: homepage
     restart: unless-stopped
 
-    group_add:
-      - "984"
-
     environment:
-      <<: *common-env
+      TZ: ${TZ}
       HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_ALLOWED_HOSTS}
+      HOMEPAGE_VAR_FAMILY_CALENDAR_ICS: ${HOMEPAGE_VAR_FAMILY_CALENDAR_ICS}
+      HOMEPAGE_VAR_PORTAINER_API_KEY: ${HOMEPAGE_VAR_PORTAINER_API_KEY}
+      HOMEPAGE_VAR_ADGUARD_USERNAME: ${HOMEPAGE_VAR_ADGUARD_USERNAME}
+      HOMEPAGE_VAR_ADGUARD_PASSWORD: ${HOMEPAGE_VAR_ADGUARD_PASSWORD}
 
     volumes:
       - ${APPDATA_DIR}/homepage:/app/config
