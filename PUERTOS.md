@@ -76,3 +76,13 @@ Documento mantenible para revisar exposicion de servicios Docker. Los valores sa
 | __lab_reactive-resume | reactive-resume-redis | Red Docker del stack | Redis interno |
 | __lab_reactive-resume | reactive-resume-seaweedfs | Red Docker del stack | S3 local para laboratorio |
 | __lab_vikunja | vikunja-db | Red Docker del stack | PostgreSQL interno |
+
+## Redes Docker con IPAM
+
+| Stack | Red | Subnet | Nota |
+| --- | --- | --- | --- |
+| __lab_affine | `lab-affine-net` | `172.30.10.0/24` | Laboratorio temporal |
+| __lab_freshrss | `lab-freshrss-net` | `172.30.11.0/24` | Laboratorio temporal |
+| __lab_vikunja | `lab-vikunja-net` | `172.30.12.0/24` | Laboratorio temporal |
+| __lab_reactive-resume | `lab-reactive-resume-data-net` | `172.30.13.0/24` | Red interna Postgres/Redis/app |
+| __lab_reactive-resume | `lab-reactive-resume-storage-net` | `172.30.14.0/24` | Red interna S3 local/app |

@@ -94,8 +94,8 @@ services:
       <<: *default-logging
 
     networks:
-      - reactive-resume-data-net
-      - reactive-resume-storage-net
+      - lab-reactive-resume-data-net
+      - lab-reactive-resume-storage-net
 
   # ============================================================
   # Reactive Resume DB
@@ -130,7 +130,7 @@ services:
       <<: *default-logging
 
     networks:
-      - reactive-resume-data-net
+      - lab-reactive-resume-data-net
 
   # ============================================================
   # Reactive Resume Redis
@@ -161,7 +161,7 @@ services:
       <<: *default-logging
 
     networks:
-      - reactive-resume-data-net
+      - lab-reactive-resume-data-net
 
   # ============================================================
   # Reactive Resume SeaweedFS
@@ -196,7 +196,7 @@ services:
       <<: *default-logging
 
     networks:
-      - reactive-resume-storage-net
+      - lab-reactive-resume-storage-net
 
   # ============================================================
   # Reactive Resume bucket
@@ -227,13 +227,18 @@ services:
       <<: *default-logging
 
     networks:
-      - reactive-resume-storage-net
+      - lab-reactive-resume-storage-net
 
 networks:
-  reactive-resume-data-net:
-    name: reactive-resume-data-net
+  lab-reactive-resume-data-net:
+    name: lab-reactive-resume-data-net
     driver: bridge
-  reactive-resume-storage-net:
-    name: reactive-resume-storage-net
+    ipam:
+      config:
+        - subnet: 172.30.13.0/24
+  lab-reactive-resume-storage-net:
+    name: lab-reactive-resume-storage-net
     driver: bridge
-
+    ipam:
+      config:
+        - subnet: 172.30.14.0/24

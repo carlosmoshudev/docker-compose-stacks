@@ -58,9 +58,12 @@ services:
       <<: *default-logging
 
     networks:
-      - freshrss-net
+      - lab-freshrss-net
 
 networks:
-  freshrss-net:
-    name: freshrss-net
+  lab-freshrss-net:
+    name: lab-freshrss-net
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.11.0/24

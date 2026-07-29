@@ -41,6 +41,7 @@ docker compose up -d
 - `TZ`, `SOCK`, `LOCALTIME`, `DBUS`, `MEDIA`, `DOWNLOADS` y `WATCH` son valores comunes compartidos por varias pilas.
 - `ZIGBEE_ADAPTER`, `ZIGBEE2MQTT_PORT` y `READARR_PORT` son variables opcionales para servicios comentados en sus compose.
 - Los stacks con prefijo `__lab_` son pruebas aisladas y no deben asumirse como produccion hasta moverlos, renombrarlos y documentarlo.
+- Las redes de laboratorio usan IPAM explicito en `172.30.10.0/24` a `172.30.14.0/24`; si se promocionan a produccion, revisar subred y nombre de red.
 - El mapa mantenible de puertos esta en `PUERTOS.md`.
 - Las integraciones operativas estan en `docs/INTEGRACIONES.md`.
 - Los procedimientos de incidencia estan en `docs/RUNBOOK.md`.

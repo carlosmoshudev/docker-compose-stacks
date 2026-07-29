@@ -79,7 +79,7 @@ services:
       <<: *default-logging
 
     networks:
-      - affine-net
+      - lab-affine-net
 
   # ============================================================
   # AFFiNE migration
@@ -116,7 +116,7 @@ services:
       <<: *default-logging
 
     networks:
-      - affine-net
+      - lab-affine-net
 
   # ============================================================
   # AFFiNE Redis
@@ -142,7 +142,7 @@ services:
       <<: *default-logging
 
     networks:
-      - affine-net
+      - lab-affine-net
 
   # ============================================================
   # AFFiNE DB
@@ -178,9 +178,12 @@ services:
       <<: *default-logging
 
     networks:
-      - affine-net
+      - lab-affine-net
 
 networks:
-  affine-net:
-    name: affine-net
+  lab-affine-net:
+    name: lab-affine-net
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.10.0/24
