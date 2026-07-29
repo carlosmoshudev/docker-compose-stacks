@@ -1,0 +1,146 @@
+# ============================================================
+# STACK: IPAM [PRODUCCION]      compose.yaml
+# ------------------------------------------------------------
+# - phpIPAM: https://phpipam.net/
+# - MariaDB: https://mariadb.org/
+# ------------------------------------------------------------
+#   Desarrollado y mantenido por Carlos Moshu
+#   Stack de cali-home, servidor domestico de Carlos y Lilia
+# ============================================================
+
+name: pro_ipam
+
+x-common-env: &common-env
+  TZ: ${TZ}
+
+x-common-labels: &common-labels
+  autoheal: "true"
+  diun.enable: "true"
+
+x-diun-labels: &diun-labels
+  diun.enable: "true"
+
+x-default-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  phpipam-web:
+    image: phpipam/phpipam-www:latest
+    container_name: phpipam-web
+    restart: unless-stopped
+
+    depends_on:
+      phpipam-db:
+        condition: service_healthy
+
+    environment:
+      <<: *common-env
+      IPAM_DATABASE_HOST: phpipam-db
+      IPAM_DATABASE_USER: ${IPAM_DB_USER}
+      IPAM_DATABASE_PASS: ${IPAM_DB_PASSWORD}
+      IPAM_DATABASE_NAME: ${IPAM_DB_NAME}
+      IPAM_DATABASE_WEBHOST: "%"
+      IPAM_DISABLE_INSTALLER: ${IPAM_DISABLE_INSTALLER}
+
+    volumes:
+      - ${APPDATA_DIR}/phpipam/logo:/phpipam/css/images/logo
+      - ${APPDATA_DIR}/phpipam/ca:/usr/local/share/ca-certificates:ro
+
+    ports:
+      - "${IPAM_HOST_PORT}:${IPAM_CONTAINER_PORT}"
+
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      interval: 1m
+      timeout: 10s
+      retries: 5
+      start_period: 1m
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/ || exit 1"]
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - ipam-net
+
+  phpipam-cron:
+    image: phpipam/phpipam-cron:latest
+    container_name: phpipam-cron
+    restart: unless-stopped
+
+    depends_on:
+      phpipam-db:
+        condition: service_healthy
+
+    environment:
+      <<: *common-env
+      IPAM_DATABASE_HOST: phpipam-db
+      IPAM_DATABASE_USER: ${IPAM_DB_USER}
+      IPAM_DATABASE_PASS: ${IPAM_DB_PASSWORD}
+      IPAM_DATABASE_NAME: ${IPAM_DB_NAME}
+      SCAN_INTERVAL: ${IPAM_SCAN_INTERVAL}
+
+    volumes:
+      - ${APPDATA_DIR}/phpipam/ca:/usr/local/share/ca-certificates:ro
+
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+    labels:
+      <<: *diun-labels
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - ipam-net
+
+  phpipam-db:
+    image: mariadb:11.4
+    container_name: phpipam-db
+    restart: unless-stopped
+
+    environment:
+      <<: *common-env
+      MYSQL_DATABASE: ${IPAM_DB_NAME}
+      MYSQL_USER: ${IPAM_DB_USER}
+      MYSQL_PASSWORD: ${IPAM_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${IPAM_DB_ROOT_PASSWORD}
+
+    volumes:
+      - ${APPDATA_DIR}/mariadb:/var/lib/mysql
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 1m
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 --silent || exit 1"]
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - ipam-net
+
+networks:
+  ipam-net:
+    name: ipam-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.20.0/24
+

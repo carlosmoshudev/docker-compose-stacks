@@ -24,10 +24,13 @@ Documento mantenible para revisar exposicion de servicios Docker. Los valores sa
 | docker | scrutiny | `SCRUTINY_HOST_PORT` | 8082 | `SCRUTINY_CONTAINER_PORT` / 8080 | TCP | Salud de discos | Red local |
 | docker | scrutiny influxdb | `SCRUTINY_INFLUXDB_HOST_PORT` | 18086 | `SCRUTINY_INFLUXDB_CONTAINER_PORT` / 8086 | TCP | Base de datos interna Scrutiny | Valorar retirar publicacion si no se consulta desde fuera |
 | docker | netdata | `NETDATA_HOST_PORT` | 19999 | `NETDATA_CONTAINER_PORT` / 19999 | TCP | Monitorizacion sistema | Sensible: red local/proxy autenticado |
+| docker | uptime-kuma | `UPTIME_KUMA_HOST_PORT` | 3003 | `UPTIME_KUMA_CONTAINER_PORT` / 3001 | TCP | Monitorizacion de disponibilidad | Red local o proxy protegido |
+| finance | firefly | `FIREFLY_HOST_PORT` | 8088 | `FIREFLY_CONTAINER_PORT` / 8080 | TCP | Finanzas personales | Sensible: proteger con proxy/autenticacion |
 | __lab_freshrss | freshrss | `FRESHRSS_HOST_PORT` | 8087 | `FRESHRSS_CONTAINER_PORT` / 80 | TCP | Lector RSS | Laboratorio, red local o proxy |
 | home | esphome | `ESPHOME_PORT` | 6052 | 6052 | TCP | ESPHome | Red local |
 | home | mosquitto | `MQTT_PORT` | 1883 | 1883 | TCP | MQTT | No exponer a Internet sin TLS/autenticacion |
 | home | nodered | `NODERED_PORT` | 1880 | 1880 | TCP | Automatizaciones visuales | Sensible: proteger con login/proxy |
+| ipam | phpipam-web | `IPAM_HOST_PORT` | 8089 | `IPAM_CONTAINER_PORT` / 80 | TCP | Gestion IPAM | Sensible: red local o proxy protegido |
 | library | audiobookshelf | `AUDIOBOOK_PORT` | 13378 | 80 | TCP | Audiolibros/podcasts | Red local o proxy |
 | library | calibre-web | `CALIBRE_PORT` | 8084 | 8083 | TCP | Biblioteca Calibre | Red local o proxy |
 | library | kavita | `KAVITA_PORT` | 5000 | 5000 | TCP | Comics/libros | Red local o proxy |
@@ -64,8 +67,12 @@ Documento mantenible para revisar exposicion de servicios Docker. Los valores sa
 | __lab_affine | affine-redis | Red Docker del stack | Cache interna |
 | docker | autoheal | Docker socket | No requiere UI |
 | docker | diun | Tarea interna/notificaciones | No requiere UI |
+| finance | firefly-cron | Job interno | Tareas programadas diarias |
+| finance | firefly-db | Red Docker del stack | MariaDB interna |
 | home | homeassistant | `network_mode: host` | Escucha desde la red host, normalmente `8123` |
 | home | matter-server | `network_mode: host` | Necesario para discovery Matter |
+| ipam | phpipam-cron | Red Docker del stack | Escaneo programado de red |
+| ipam | phpipam-db | Red Docker del stack | MariaDB interna |
 | library | romm-db | Red Docker del stack | Base de datos interna |
 | media | transmission | Red compartida con `transmission-gluetun` | La UI sale por el puerto de Gluetun |
 | media | unpackerr | Red Docker/salidas HTTP | No requiere UI |
@@ -86,3 +93,6 @@ Documento mantenible para revisar exposicion de servicios Docker. Los valores sa
 | __lab_vikunja | `lab-vikunja-net` | `172.30.12.0/24` | Laboratorio temporal |
 | __lab_reactive-resume | `lab-reactive-resume-data-net` | `172.30.13.0/24` | Red interna Postgres/Redis/app |
 | __lab_reactive-resume | `lab-reactive-resume-storage-net` | `172.30.14.0/24` | Red interna S3 local/app |
+| ipam | `ipam-net` | `172.30.20.0/24` | Red phpIPAM y MariaDB |
+| finance | `finance-net` | `172.30.21.0/24` | Red Firefly III y MariaDB |
+| docker | `docker-monitoring-net` | `172.30.22.0/24` | Red Uptime Kuma |

@@ -24,9 +24,14 @@ No se debe anadir `autoheal=true` a un servicio sin healthcheck real. En ese cas
 | `docker` | `dozzle` | `/dozzle healthcheck` |
 | `docker` | `netdata` | `netdatacli ping` |
 | `docker` | `scrutiny` | HTTP interno |
+| `docker` | `uptime-kuma` | HTTP interno en `3001` |
+| `finance` | `firefly` | HTTP interno en `8080` |
+| `finance` | `firefly-db` | `mariadb-admin ping` |
 | `home` | `esphome` | HTTP interno en `6052` |
 | `home` | `homeassistant` | HTTP interno en `8123` |
 | `home` | `nodered` | HTTP interno en `1880` |
+| `ipam` | `phpipam-db` | `mariadb-admin ping` |
+| `ipam` | `phpipam-web` | HTTP interno |
 | `__lab_freshrss` | `freshrss` | HTTP interno |
 | `__lab_reactive-resume` | `reactive-resume` | `/api/health` |
 | `__lab_reactive-resume` | `reactive-resume-db` | `pg_isready` |
@@ -62,6 +67,7 @@ Estos servicios se vigilan para actualizaciones, pero no se reinician automatica
 | `docker` | `autoheal` | Supervisor de reinicios; no debe autogestionarse. |
 | `docker` | `diun` | Servicio de vigilancia; no hay healthcheck necesario para autoheal. |
 | `docker` | `portainer` | Imagen minimalista sin tooling interno fiable para Compose. |
+| `finance` | `firefly-cron` | Job programado continuo sin endpoint HTTP propio. |
 | `home` | `matter-server` | Servicio host/network sensible; evitar reinicios automaticos por check debil. |
 | `home` | `mosquitto` | El check correcto depende de credenciales MQTT reales. |
 | `__lab_reactive-resume` | `reactive-resume-create-bucket` | Job de inicializacion, no servicio continuo. |
@@ -69,6 +75,7 @@ Estos servicios se vigilan para actualizaciones, pero no se reinician automatica
 | `media` | `recyclarr` | Tarea/sincronizador, no servicio web continuo critico. |
 | `media` | `unpackerr` | Proceso worker sin endpoint HTTP de salud necesario. |
 | `network` | `adguardhome` | El proyecto retiro el Docker HEALTHCHECK por problemas operativos. |
+| `ipam` | `phpipam-cron` | Worker de escaneo sin endpoint HTTP propio. |
 | `__lab_vikunja` | `vikunja` | Servicio web vigilado por DIUN; no se fuerza autoheal hasta validar endpoint interno estable en la imagen. |
 
 ## Fuentes usadas
@@ -87,6 +94,9 @@ Estos servicios se vigilan para actualizaciones, pero no se reinician automatica
 - Vikunja Docker example: https://vikunja.io/docs/full-docker-example/
 - FreshRSS Docker image: https://hub.docker.com/r/freshrss/freshrss
 - Reactive Resume Docker example: https://docs.rxresu.me/self-hosting/docker
+- phpIPAM Docker image: https://hub.docker.com/r/phpipam/phpipam-www
+- Firefly III Docker install: https://docs.firefly-iii.org/how-to/firefly-iii/installation/docker/
+- Uptime Kuma Docker compose: https://github.com/louislam/uptime-kuma/blob/master/compose.yaml
 
 ## Validacion recomendada
 

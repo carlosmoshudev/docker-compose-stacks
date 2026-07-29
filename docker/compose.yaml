@@ -7,6 +7,7 @@
 # - Netdata:    http://netdata.dev/
 # - Portainer:  http://portainer.dev/
 # - Scrutiny:   http://scrutiny.dev/
+# - Uptime Kuma: https://uptime.kuma.pet/
 # ------------------------------------------------------------
 #   Desarrollado y mantenido por Carlos Moshu
 #   Stack de cali-home, Servidor doméstico de Carlos y Lilia
@@ -95,6 +96,41 @@ services:
     logging:
       <<: *default-logging
 
+
+  # ============================================================
+  # Uptime Kuma
+  # ------------------------------------------------------------
+  # Monitorizacion de disponibilidad de servicios internos.
+  # ============================================================
+  uptime-kuma:
+    image: louislam/uptime-kuma:2
+    container_name: uptime-kuma
+    restart: unless-stopped
+
+    volumes:
+      - ${APPDATA_DIR}/uptime-kuma:/app/data
+
+    ports:
+      - "${UPTIME_KUMA_HOST_PORT}:${UPTIME_KUMA_CONTAINER_PORT}"
+
+    labels:
+      <<: *common-labels
+
+    healthcheck:
+      <<: *http-healthcheck
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ]
+
+    logging:
+      <<: *default-logging
+
+    networks:
+      - docker-monitoring-net
 
 
   # ============================================================
@@ -248,3 +284,11 @@ services:
 
     logging:
       <<: *default-logging
+
+networks:
+  docker-monitoring-net:
+    name: docker-monitoring-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.22.0/24

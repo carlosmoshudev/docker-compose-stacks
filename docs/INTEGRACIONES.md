@@ -13,6 +13,9 @@ Mapa operativo de integraciones entre servicios del homelab.
 | Home Assistant | Comandos y automatizaciones interactivas | Telegram | Integracion nativa HA | `home`, `critical` | Servicio `notify` o comando del bot |
 | FreshRSS | Articulos/fuentes seleccionadas | n8n o Vikunja | API/RSS/filtro manual | `rss`, `reading` | Probar con una fuente de GitHub releases |
 | Vikunja | Tareas y recordatorios | Calendario/n8n | API, CalDAV o iCal | `home`, `tasks` | Crear tarea de prueba desde n8n |
+| Uptime Kuma | Caidas/recuperaciones | Apprise o n8n | Webhook/notification provider | `critical`, `home` | Monitor HTTP contra `http://cali-home:8000/status` |
+| phpIPAM | Inventario red/subredes | Documentacion operativa | UI/API | `network`, `ipam` | Registrar red Docker `172.30.20.0/24` |
+| Firefly III | Finanzas personales | Backups/alertas | Export/manual/API | `finance` | Crear cuenta de prueba y revisar backup DB |
 
 ## Apprise
 
@@ -41,3 +44,6 @@ Se puede reutilizar el bot de Home Assistant si Apprise solo envia mensajes. La 
 - Vikunja puede recibir tareas desde n8n, RSS o Telegram si se decide centralizar pendientes.
 - FreshRSS puede reducir correos de notificaciones y concentrar lectura tecnica en feeds.
 - Reactive Resume queda en `__lab_reactive-resume/` hasta validar si merece promocionarse.
+- Uptime Kuma debe vigilar al menos NPM, AdGuard, Apprise, n8n, Home Assistant y los dashboards.
+- phpIPAM sera la fuente visual para subredes LAN, Docker, VPN, IoT y laboratorio.
+- Firefly III contiene datos sensibles y debe quedar protegido si se publica por proxy.

@@ -14,7 +14,6 @@ Estas ideas no estan aplicadas. Sirven como backlog para evaluar con calma antes
 
 | Servicio | Encaje | Motivo |
 | --- | --- | --- |
-| Uptime Kuma | `docker` o `dashboard` | Monitorizacion simple de URLs, puertos y certificados con alertas. |
 | Beszel | `docker` | Monitorizacion ligera de hosts y contenedores. |
 | Dockge | `docker` | Gestion visual de stacks Compose manteniendo archivos YAML como fuente. |
 

@@ -8,8 +8,10 @@ Este workspace agrupa varias pilas Docker Compose independientes, cada una en su
 - `__lab_affine/` : AFFiNE, postgres, redis en laboratorio temporal
 - `dashboard/` : homepage, homarr, glances
 - `docker/` : autoheal, dozzle, diun, netdata, portainer, scrutiny
+- `finance/` : Firefly III, MariaDB
 - `__lab_freshrss/` : FreshRSS en laboratorio temporal
 - `home/` : esphome, homeassistant, matter-server, mosquitto, nodered
+- `ipam/` : phpIPAM, MariaDB
 - `__lab_reactive-resume/` : Reactive Resume en laboratorio temporal
 - `library/` : audiobookshelf, calibre-web, kavita, romm, romm-db
 - `media/` : transmission, prowlarr, sonarr, radarr, bazarr, lidarr, jellyfin, jellyseerr, unpackerr, recyclarr, flaresolverr
@@ -42,6 +44,7 @@ docker compose up -d
 - `ZIGBEE_ADAPTER`, `ZIGBEE2MQTT_PORT` y `READARR_PORT` son variables opcionales para servicios comentados en sus compose.
 - Los stacks con prefijo `__lab_` son pruebas aisladas y no deben asumirse como produccion hasta moverlos, renombrarlos y documentarlo.
 - Las redes de laboratorio usan IPAM explicito en `172.30.10.0/24` a `172.30.14.0/24`; si se promocionan a produccion, revisar subred y nombre de red.
+- Las redes PRO añadidas para servicios nuevos usan IPAM explicito en `172.30.20.0/24` a `172.30.22.0/24`.
 - El mapa mantenible de puertos esta en `PUERTOS.md`.
 - Las integraciones operativas estan en `docs/INTEGRACIONES.md`.
 - Los procedimientos de incidencia estan en `docs/RUNBOOK.md`.

@@ -17,8 +17,10 @@ Inventario inicial de rutas persistentes y criterios de restauracion.
 | automation | `/srv/containers/pro/automation/data` | Alta | Workflows y credenciales de n8n |
 | dashboard | `/srv/containers/pro/dashboard/data` | Media | Configuracion de dashboards |
 | docker | `/srv/containers/pro/docker/data` | Alta | Portainer, Netdata, Scrutiny y DIUN |
+| finance | `/srv/containers/pro/finance/data` | Alta | Firefly III y MariaDB con datos financieros |
 | __lab_freshrss | `/srv/containers/pro/__lab_freshrss/data` | Baja | Laboratorio FreshRSS, feeds, usuarios y extensiones |
 | home | `/srv/containers/pro/home/data` | Muy alta | Home Assistant, Node-RED, Matter y Mosquitto |
+| ipam | `/srv/containers/pro/ipam/data` | Alta | phpIPAM, MariaDB e inventario de red |
 | __lab_reactive-resume | `/srv/containers/pro/__lab_reactive-resume/data` | Baja | Laboratorio de CVs; subir criticidad si se usa en serio |
 | library | `/srv/containers/pro/library/data` | Alta | Bibliotecas y base de datos RomM |
 | media | `/srv/containers/pro/media/data` | Alta | Configuracion de servicios media |
