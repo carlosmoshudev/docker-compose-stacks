@@ -38,7 +38,7 @@ services:
   # Base de datos principal para N8N.
   # ============================================================
   n8n-db:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     container_name: n8n-db
     restart: unless-stopped
 
